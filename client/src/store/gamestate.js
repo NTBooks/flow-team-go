@@ -10,7 +10,7 @@ const initialGameState = {
 
 };
 
-const userSlice = createSlice({
+const gameSlice = createSlice({
     name: 'gamestate',
     initialState: initialGameState,
     reducers: {
@@ -39,6 +39,6 @@ const userSlice = createSlice({
 });
 
 
-export const userActions = userSlice.actions;
+export const gameActions = gameSlice.actions;
 
-export default userSlice.reducer;
+export default gameSlice.reducer;

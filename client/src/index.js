@@ -1,7 +1,6 @@
 import { Fragment } from "react";
-import App from "./App";
+import App from "./components/App";
 import { HelmetProvider } from "react-helmet-async";
-import { BrowserRouter } from 'react-router-dom';
 import store from './store/index';
 import { Provider } from 'react-redux';
 
@@ -12,10 +11,10 @@ const root = createRoot(container);
 root.render(<Fragment>
 
     <HelmetProvider>
-        <BrowserRouter>
-            <Provider store={store}>
-                <App />
-            </Provider>
-        </BrowserRouter>
+
+        <Provider store={store}>
+            <App />
+        </Provider>
+
     </HelmetProvider>
 </Fragment>);
