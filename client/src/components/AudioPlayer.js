@@ -1,0 +1,46 @@
+import React, { useState, useEffect } from 'react';
+import useAudio from '../hooks/useAudio';
+import useKeyPress from '../hooks/useKeyPress';
+import { useSelector } from 'react-redux';
+
+const AudioPlayer = (props) => {
+    const audioFiles = props.file ? [props.file] : [
+        require('url:../../public/bgm/BeachBump.mp3'),
+        require('url:../../public/bgm/MuteCityFluff.mp3'),
+        require('url:../../public/bgm/DolphinWavvves.mp3'),
+        require('url:../../public/bgm/DankTank.mp3'),
+        require('url:../../public/bgm/sixampier.mp3')
+
+    ];
+
+    const [playing, toggle, skip] = useAudio(audioFiles, props.loop);
+
+    const [BGMPlayer, setBGMPlayer] = useState();
+    const BGMState = useSelector(state => state.gamestate.bgm_toggle);
+    const SFXState = useSelector(state => state.gamestate.sfx_toggle);
+
+    useEffect(() => {
+
+        if (BGMState) {
+            skip();
+        } else {
+            toggle(false);
+        }
+
+    }, [BGMState]);
+
+
+
+    const sPress = useKeyPress("s");
+
+    useEffect(() => {
+        if (BGMState && sPress) {
+            skip();
+        }
+    }, [sPress]);
+
+    return <></>;
+
+}
+export default AudioPlayer;
+

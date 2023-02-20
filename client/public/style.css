@@ -25,3 +25,11 @@
     font-size: 12px;
   }
 }
+
+body {
+  background-color: #212529 !important;
+}
+
+.optcontainer {
+  font-size: 2rem;
+}

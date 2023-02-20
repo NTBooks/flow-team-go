@@ -5,6 +5,7 @@ import useKeyPress from "../hooks/useKeyPress";
 
 import styled from 'styled-components';
 import NESTabs from "./NESTabs";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -22,6 +23,7 @@ box-shadow: 0px 0px 1rem #FFFFFF;
 
 const GameScreen = (props) => {
 
+    const navigate = useNavigate();
 
     const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -48,11 +50,14 @@ const GameScreen = (props) => {
 
         // TODO: navigate between the panes
         console.log(selectableObjects[selectedIndex]);
+        if (!props.hideTabs) {
+            navigate(selectableObjects[selectedIndex]);
+        }
     }, [selectedIndex]);
 
 
     return <OuterBezel>
-        <NESTabs currTab={selectedIndex + 1} setTab={setSelectedIndex} />
+        {!props.hideTabs && <NESTabs currTab={selectedIndex + 1} setTab={setSelectedIndex} />}
         {props.children}
     </OuterBezel>;
 

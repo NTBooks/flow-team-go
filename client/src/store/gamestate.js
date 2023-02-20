@@ -25,9 +25,12 @@ const gameSlice = createSlice({
         },
         toggleBGM(state, action) {
             // TODO: write logic to turn BGM on or off
+
+            state.bgm_toggle = action.payload.set;
         },
         toggleSFX(state, action) {
             // TODO: write logic to turn SFX on or off
+            state.sfx_toggle = action.payload.set;
         },
         loadDBState() {
             // TODO: accept state config that might be requested from a website

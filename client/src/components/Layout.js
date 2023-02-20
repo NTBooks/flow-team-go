@@ -5,7 +5,22 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Image from "react-bootstrap/Image";
-import styled from "styled-components";
+import styled, { keyframes } from 'styled-components';
+
+
+const fadeIn = keyframes`
+  from {
+   // transform: scale(.25);
+    opacity: 0;
+    filter: blur(1.5rem);
+  }
+
+  to {
+  //  transform: scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+`;
 
 const BGPane = styled.div`
 background-image: url(${props => props.bg ? props.bg : require('../../public/ai_art/Night.png')});
@@ -16,6 +31,7 @@ background-size: cover;
 background-position: center center;
 z-index: -10000;
 image-rendering: pixelated;
+animation: ${fadeIn} 1s linear;
 `
 
 function Layout(props) {
@@ -34,27 +50,29 @@ function Layout(props) {
         // TODO: Time based background image
         const currentHour = (new Date()).getHours();
 
+        console.log(currentHour)
+
         if (currentHour > 20 || currentHour < 4) {
             setBg(require('../../public/ai_art/Night.png'));
         }
 
-        if (currentHour < 7) {
+        else if (currentHour < 7) {
             setBg(require('../../public/ai_art/PreDawn.png'));
         }
 
-        if (currentHour < 10) {
+        else if (currentHour < 10) {
             setBg(require('../../public/ai_art/Morning.png'));
         }
 
-        if (currentHour < 15) {
+        else if (currentHour < 15) {
             setBg(require('../../public/ai_art/Day.png'));
         }
 
-        if (currentHour < 18) {
+        else if (currentHour < 18) {
             setBg(require('../../public/ai_art/Afternoon.png'));
         }
 
-        if (currentHour < 20) {
+        else if (currentHour < 20) {
             setBg(require('../../public/ai_art/Sunset.png'));
         }
 

@@ -4,15 +4,16 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import GameScreen from "./GameScreen";
 import ComponentTester from "./ComponentTester";
-
-// todo: right and left arrows navigate pages
-
+import TeamPane from "./TeamPane";
+import OptionsPane from "./OptionsPane";
+import Intro from "./Intro";
+import AudioPlayer from "./AudioPlayer";
 
 
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <></>,
+        element: <><GameScreen hideTabs={true}><Intro /></GameScreen></>,
     },
     {
         path: "/test",
@@ -21,7 +22,23 @@ const router = createBrowserRouter([
     {
         path: "/g/:gallery",
         element: <></>,
-    }
+    },
+    {
+        path: "/a_team",
+        element: <><GameScreen><TeamPane letter="A" /></GameScreen></>,
+    },
+    {
+        path: "/b_team",
+        element: <><GameScreen><TeamPane letter="B" /></GameScreen></>,
+    },
+    {
+        path: "/options",
+        element: <><GameScreen><OptionsPane /></GameScreen></>,
+    },
+    {
+        path: "/about",
+        element: <><GameScreen>About</GameScreen></>,
+    },
 
     // TODO: routes for /g/gallery/a_team
     // TODO: routes for /g/gallery/b_team
@@ -35,7 +52,7 @@ const App = () => {
     return (
         <HelmetProvider>
             <Layout>
-
+                <AudioPlayer loop={true} />
                 <RouterProvider router={router} />
 
             </Layout>
