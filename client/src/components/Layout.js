@@ -5,10 +5,24 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Image from "react-bootstrap/Image";
+import styled from "styled-components";
+
+const BGPane = styled.div`
+background-image: url(${props => props.bg ? props.bg : require('../../public/ai_art/Night.png')});
+position: fixed;
+width: 100vw;
+height: 100vh;
+background-size: cover;
+background-position: center center;
+z-index: -10000;
+image-rendering: pixelated;
+`
 
 function Layout(props) {
 
     const [lastCreatedAddress, setLastCreatedAddress] = useState("");
+
+    const [bg, setBg] = useState();
 
     useEffect(() => {
 
@@ -16,12 +30,44 @@ function Layout(props) {
 
     }, []);
 
+    useEffect(() => {
+        // TODO: Time based background image
+        const currentHour = (new Date()).getHours();
+
+        if (currentHour > 20 || currentHour < 4) {
+            setBg(require('../../public/ai_art/Night.png'));
+        }
+
+        if (currentHour < 7) {
+            setBg(require('../../public/ai_art/PreDawn.png'));
+        }
+
+        if (currentHour < 10) {
+            setBg(require('../../public/ai_art/Morning.png'));
+        }
+
+        if (currentHour < 15) {
+            setBg(require('../../public/ai_art/Day.png'));
+        }
+
+        if (currentHour < 18) {
+            setBg(require('../../public/ai_art/Afternoon.png'));
+        }
+
+        if (currentHour < 20) {
+            setBg(require('../../public/ai_art/Sunset.png'));
+        }
+
+
+    }, []);
+
     return (
         <>
-            <Navbar bg="dark" fixed="top" style={{ padding: 0 }}>
+            <BGPane bg={bg} />
+            <Navbar bg="dark" fixed="top" style={{ padding: 0, color: 'white' }}>
                 <Container>
                     <Navbar.Brand href="/">
-                        <Image src={require('../../public/ai_art/BG1.png')} height="50" alt="Logo" />
+                        <Image src={bg} height="50" alt="Logo" />
                     </Navbar.Brand>
                     <Nav className="ml-auto">
                         <Nav.Link href="/">New Gallery</Nav.Link>
