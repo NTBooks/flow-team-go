@@ -6,6 +6,14 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# ignore other project
+bookshop/ccviewer/
+
+.data
+unlockable
+tmp
+cid_seed
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -102,3 +110,10 @@ dist
 
 # TernJS port file
 .tern-port
+
+.parcel-cache
+*.swo
+*.swp
+
+parcel-bundle-reports
+parcel-bundle-reports/*
