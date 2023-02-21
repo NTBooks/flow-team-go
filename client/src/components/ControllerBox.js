@@ -101,7 +101,7 @@ const ControllerBox = () => {
         console.log(key);
     }
 
-    return <ControllerPanel>
+    return <ControllerPanel className="controllerbox">
         <ControllerCross>
 
             <ControllerUpButton onClick={(e) => { simulateKey('ArrowUp') }} />

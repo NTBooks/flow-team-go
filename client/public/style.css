@@ -1,12 +1,21 @@
-@media (max-width: 576px) {
+html {
+  font-size: 20px;
+}
+
+@media (max-width: 1200px) {
   html {
-    font-size: 6px;
+    font-size: 18px;
+  }
+}
+@media (max-width: 992px) {
+  html {
+    font-size: 16px;
   }
 }
 
 @media (max-width: 768px) {
   html {
-    font-size: 8px;
+    font-size: 14px;
   }
 
   .hideSmall {
@@ -14,20 +23,19 @@
   }
 }
 
-@media (max-width: 992px) {
-  html {
-    font-size: 10px;
-  }
-}
-
-@media (max-width: 1200px) {
+@media (max-width: 576px) {
   html {
     font-size: 12px;
+  }
+
+  .controllerbox {
+    margin-top: 8rem !important;
   }
 }
 
 body {
   background-color: #212529 !important;
+  font-size: 1rem !important;
 }
 
 .optcontainer {

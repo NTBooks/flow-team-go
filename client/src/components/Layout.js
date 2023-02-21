@@ -96,12 +96,12 @@ function Layout(props) {
                     </Nav>
                 </Container>
             </Navbar> */}
-            <Container className="" style={{ paddingTop: '0.5rem', marginTop: '0 !important' }}>
-                <Row>
-                    <Col xs={12}>
+            <Container className="" style={{ paddingTop: '0.5rem', marginTop: '0 !important' }} fluid>
+                <Row style={{ width: '100%' }}>
+                    <Col xl={6} lg={12}>
                         {props.children}
                     </Col>
-                    <Col xs={12}>
+                    <Col xl={6} lg={12}>
                         <ControllerBox />
                     </Col>
                 </Row>
