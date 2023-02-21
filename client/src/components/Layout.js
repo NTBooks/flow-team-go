@@ -52,7 +52,6 @@ function Layout(props) {
         // TODO: Time based background image
         const currentHour = (new Date()).getHours();
 
-        console.log(currentHour)
 
         if (currentHour > 20 || currentHour < 4) {
             setBg(require('../../public/ai_art/Night.png'));

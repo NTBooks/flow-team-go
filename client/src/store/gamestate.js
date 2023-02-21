@@ -7,7 +7,10 @@ const initialGameState = {
     bgm_toggle: false,
     sfx_toggle: false,
     currentBG: '',
-    network: 'demo'
+    network: 'demo',
+    jwt: '',
+    galleryName: '',
+    gallery: ''
 
 };
 
@@ -17,6 +20,9 @@ const gameSlice = createSlice({
     reducers: {
         setUserWallet(state, action) {
             state.userWallet = action.payload.address;
+            state.gallery = action.payload.gallery;
+            state.galleryName = action.payload.galleryName;
+            state.jwt = action.payload.jwt;
         },
         addToTeam(state, action) {
             // TODO: write add to team logic

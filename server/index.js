@@ -104,14 +104,9 @@ app.post("/v1/create", authenticateToken, async (req, res) => {
         }
 
 
-        if (ethRegex.test(userWallet) || /.+\.eth$/.test(userWallet.toLowerCase())) {
+        if (/^0x[0-9a-fA-F]{16}$/.test(userWallet) || /.+\.find$/.test(userWallet.toLowerCase())) {
 
-
-            await db.linkWallet(userName, userWallet, 'ETH');
-
-        } else if (tezosRegex.test(userWallet) || /.+\.tez$/.test(userWallet.toLowerCase())) {
-
-            await db.linkWallet(userName, userWallet, 'XTZ');
+            await db.linkWallet(userName, userWallet, 'FLOW');
         } else {
             throw { message: "Wallet address invalid." };
         }
@@ -229,28 +224,6 @@ app.post("/v1/markteam", authenticateToken, async (req, res) => {
 
 });
 
-app.post("/v1/addwallet", authenticateToken, async (req, res) => {
-    try {
-        const newwallet = req.bodyString("wallet");
-        const gallery = req.user.userName;
-        if (ethRegex.test(newwallet) || tezosRegex.test(newwallet)) {
-
-            await db.linkWallet(gallery, newwallet, ethRegex.test(newwallet) ? "ETH" : "XTZ");
-
-
-        } else {
-            throw { message: "Wallet name not recognized." }
-        }
-
-        // Send a fresh token
-        res.send({ message: "SUCCESS" });
-
-    } catch (ex) {
-        res.statusCode = 403;
-        return res.send({ message: ex.message });
-    }
-
-});
 
 app.get("/v1/getgallery/:gallery", async (req, res) => {
     try {
@@ -270,7 +243,7 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
 
 
 // Serve react frontend
-const buildPath = path.normalize(path.join(__dirname, '../../artviewer/dist'));
+const buildPath = path.normalize(path.join(__dirname, '../client/dist'));
 app.use(express.static(buildPath));
 const rootRouter = express.Router();
 

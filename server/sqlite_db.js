@@ -36,7 +36,7 @@ dbWrapper
                 );
 
                 await db.run(
-                    "CREATE TABLE Wallets (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, address TEXT)"
+                    "CREATE TABLE Wallets (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, address TEXT, chain TEXT, verified INT)"
                 );
             }
         } catch (dbError) {

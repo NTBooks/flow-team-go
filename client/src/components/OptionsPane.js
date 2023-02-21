@@ -24,19 +24,6 @@ const OptionsPane = (props) => {
     const BGMState = useSelector(state => state.gamestate.bgm_toggle);
     const SFXState = useSelector(state => state.gamestate.sfx_toggle);
 
-    // const [BGMPlayer, setBGMPlayer] = useState();
-
-    // const audioFiles = [
-    //     require('url:../../public/bgm/MuteCityFluff.mp3'),
-    //     require('url:../../public/bgm/DankTank.mp3'),
-    //     require('url:../../public/bgm/DolphinWavvves.mp3'),
-    //     require('url:../../public/bgm/BeachBump.mp3'),
-    //     require('url:../../public/bgm/sixampier.mp3')
-
-    // ]
-
-    // const [playing, toggle, skip] = useAudio(audioFiles);
-
     const blip = useAudio([require('url:../../public/sfx/Move.wav')], false)[2];
     const huzuh = useAudio([require('url:../../public/sfx/Select.wav')], false)[2];
 
@@ -66,9 +53,9 @@ const OptionsPane = (props) => {
         <SelectableWrapper key={'bgm'} onClick={(e) => { setSelectedIndex(0) }} isSelected={selectedIndex == 0}><OptionsLabel> BGM </OptionsLabel></SelectableWrapper>,
         <SelectableWrapper key={'sfx'} onClick={(e) => { setSelectedIndex(1) }} isSelected={selectedIndex == 1}><OptionsLabel> SFX </OptionsLabel></SelectableWrapper>,
         <SelectableWrapper key={'demo'} onClick={(e) => { setSelectedIndex(2) }} isSelected={selectedIndex == 2}><OptionsLabel> Load Demo </OptionsLabel></SelectableWrapper>
-
-
     ];
+
+    // TODO: Use SFXMenu to cut down on code reuse
 
     return <>
 

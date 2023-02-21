@@ -9,7 +9,7 @@ import OptionsPane from "./OptionsPane";
 import Intro from "./Intro";
 import AudioPlayer from "./AudioPlayer";
 import AboutPane from "./AboutPane";
-
+import styled from "styled-components";
 
 const router = createBrowserRouter([
     {
@@ -21,15 +21,15 @@ const router = createBrowserRouter([
         element: <><GameScreen>Test<ComponentTester /></GameScreen></>,
     },
     {
-        path: "/g/:gallery",
-        element: <></>,
-    },
-    {
-        path: "/a_team",
+        path: "/:gallery",
         element: <><GameScreen><TeamPane letter="A" /></GameScreen></>,
     },
     {
-        path: "/b_team",
+        path: "/:gallery/a_team",
+        element: <><GameScreen><TeamPane letter="A" /></GameScreen></>,
+    },
+    {
+        path: "/:gallery/b_team",
         element: <><GameScreen><TeamPane letter="B" /></GameScreen></>,
     },
     {
@@ -57,6 +57,7 @@ const App = () => {
                 <RouterProvider router={router} />
 
             </Layout>
+
         </HelmetProvider>);
 }
 

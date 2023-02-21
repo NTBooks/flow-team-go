@@ -6,32 +6,36 @@ const useKeyPress = function (targetKey) {
 
 
     React.useEffect(() => {
-        function downHandler({ key }) {
-            if (key === targetKey) {
+        function downHandler(e) {
+
+            if (e.key === targetKey) {
+                e.preventDefault();
                 setKeyPressed(true);
             }
-            console.log("Set pressed to true: " + key);
+
         }
 
-        const upHandler = ({ key }) => {
-            if (key === targetKey) {
+        const upHandler = (e) => {
+
+            if (e.key === targetKey) {
+                e.preventDefault();
                 setKeyPressed(false);
             }
-            console.log("Set pressed to false: " + key);
+
         };
 
         function fakeHandler(e) {
 
             if (e.key === targetKey) {
                 setKeyPressed(true);
-                console.log("Set pressed to true: " + e.key);
+
             }
 
             // Add a fake delay
             setTimeout(() => {
                 if (e.key === targetKey) {
                     setKeyPressed(false);
-                    console.log("Set pressed to false: " + e.key);
+
                 }
             }, 10);
 
