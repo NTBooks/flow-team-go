@@ -7,6 +7,7 @@ const initialGameState = {
     bgm_toggle: false,
     sfx_toggle: false,
     currentBG: '',
+    network: 'demo'
 
 };
 
@@ -32,9 +33,12 @@ const gameSlice = createSlice({
             // TODO: write logic to turn SFX on or off
             state.sfx_toggle = action.payload.set;
         },
-        loadDBState() {
+        loadDBState(state, action) {
             // TODO: accept state config that might be requested from a website
 
+        },
+        setNetwork(state, action) {
+            state.network = action.payload.network;
         }
 
 

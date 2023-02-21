@@ -2,9 +2,17 @@ html {
   font-size: 20px;
 }
 
+.controllerbox {
+  margin-top: 24rem !important;
+}
+
 @media (max-width: 1200px) {
   html {
     font-size: 18px;
+  }
+
+  .controllerbox {
+    margin-top: 4rem !important;
   }
 }
 @media (max-width: 992px) {

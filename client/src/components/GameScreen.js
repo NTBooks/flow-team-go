@@ -1,18 +1,50 @@
 
 import react, { useEffect, useState } from "react";
 import useKeyPress from "../hooks/useKeyPress";
-// Make width 200 rem, then everyting inside is scaled. To scale the box set the REM?
-
-import styled from 'styled-components';
 import NESTabs from "./NESTabs";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useAudio from "../hooks/useAudio";
+import styled, { keyframes } from 'styled-components';
+
+const fadeIn = keyframes`
+  from {
+   
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+`;
+
+const fadeOut = keyframes`
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+`;
+
+const Fade = styled.div`
+position: absolute;
+width: 100%;
+height:100%;
+padding: 0 0 0 0;
+margin: 0 0 0 0;
+  ${props => props.out ?
+        `display: none;`
+        : `display: inline-block;`
+    }
+  animation: ${props => props.out ? fadeOut : fadeIn} 1s linear;
+`;
 
 const OuterBezel = styled.div`
 width: 40rem;
 height: 40rem;
-
+position:relative;
 background: #FDF8FE;
 color: #2F3332;
 opacity: 0.9;
@@ -63,8 +95,10 @@ const GameScreen = (props) => {
 
 
     return <OuterBezel>
-        {!props.hideTabs && <NESTabs currTab={selectedIndex + 1} setTab={setSelectedIndex} />}
-        {props.children}
+        <Fade>
+            {!props.hideTabs && <NESTabs currTab={selectedIndex + 1} setTab={setSelectedIndex} />}
+            {props.children}
+        </Fade>
     </OuterBezel>;
 
 }
