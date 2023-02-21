@@ -8,6 +8,7 @@ import TeamPane from "./TeamPane";
 import OptionsPane from "./OptionsPane";
 import Intro from "./Intro";
 import AudioPlayer from "./AudioPlayer";
+import AboutPane from "./AboutPane";
 
 
 const router = createBrowserRouter([
@@ -37,7 +38,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/about",
-        element: <><GameScreen>About</GameScreen></>,
+        element: <><GameScreen><AboutPane /></GameScreen></>,
     },
 
     // TODO: routes for /g/gallery/a_team

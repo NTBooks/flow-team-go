@@ -10,20 +10,52 @@ const useKeyPress = function (targetKey) {
             if (key === targetKey) {
                 setKeyPressed(true);
             }
+            console.log("Set pressed to true: " + key);
         }
 
         const upHandler = ({ key }) => {
             if (key === targetKey) {
                 setKeyPressed(false);
             }
+            console.log("Set pressed to false: " + key);
         };
+
+        function fakeHandler(e) {
+
+            if (e.key === targetKey) {
+                setKeyPressed(true);
+                console.log("Set pressed to true: " + e.key);
+            }
+
+            // Add a fake delay
+            setTimeout(() => {
+                if (e.key === targetKey) {
+                    setKeyPressed(false);
+                    console.log("Set pressed to false: " + e.key);
+                }
+            }, 10);
+
+
+            // window.dispatchEvent(new KeyboardEvent('keydown', {
+            //     'key': e.key
+            // }));
+
+            // window.dispatchEvent(new KeyboardEvent('keyup', {
+            //     'key': e.key
+            // }));
+
+            console.log("FAKE KEY: " + e.key);
+        }
 
         window.addEventListener("keydown", downHandler);
         window.addEventListener("keyup", upHandler);
 
+        document.addEventListener("fakekeypress", fakeHandler);
+
         return () => {
             window.removeEventListener("keydown", downHandler);
             window.removeEventListener("keyup", upHandler);
+            document.removeEventListener("fakekeypress", fakeHandler);
         };
     }, [targetKey]);
 

@@ -17,6 +17,7 @@ const TeamPane = (props) => {
     const upPress = useKeyPress("ArrowUp");
 
     useEffect(() => {
+        console.log("TEAM UP KEY PRESS");
         if (selectableObjects.length && upPress) {
             if (SFXState && selectedIndex > 0)
                 blip();
@@ -25,6 +26,7 @@ const TeamPane = (props) => {
     }, [upPress]);
 
     useEffect(() => {
+        console.log("TEAM DOWN KEY PRESS");
         if (selectableObjects.length && downPress) {
             if (SFXState && selectedIndex < selectableObjects.length - 1)
                 blip();

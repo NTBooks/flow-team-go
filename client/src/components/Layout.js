@@ -6,6 +6,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Image from "react-bootstrap/Image";
 import styled, { keyframes } from 'styled-components';
+import ControllerBox from "./ControllerBox";
 
 
 const fadeIn = keyframes`
@@ -25,14 +26,15 @@ const fadeIn = keyframes`
 const BGPane = styled.div`
 background-image: url(${props => props.bg ? props.bg : require('../../public/ai_art/Night.png')});
 position: fixed;
-width: 100vw;
-height: 100vh;
+width: 100%;
+height: 100%;
 background-size: cover;
 background-position: center center;
 z-index: -10000;
 image-rendering: pixelated;
 animation: ${fadeIn} 1s linear;
 `
+
 
 function Layout(props) {
 
@@ -82,7 +84,7 @@ function Layout(props) {
     return (
         <>
             <BGPane bg={bg} />
-            <Navbar bg="dark" fixed="top" style={{ padding: 0, color: 'white' }}>
+            {/* <Navbar bg="dark" fixed="top" style={{ padding: 0, color: 'white' }}>
                 <Container>
                     <Navbar.Brand href="/">
                         <Image src={bg} height="50" alt="Logo" />
@@ -93,16 +95,19 @@ function Layout(props) {
                         <Nav.Link href="" target={'_blank'}>My Twitter</Nav.Link>
                     </Nav>
                 </Container>
-            </Navbar>
-            <Container className="mt-5" style={{ marginBottom: '4rem', paddingTop: '1rem' }}>
+            </Navbar> */}
+            <Container className="" style={{ paddingTop: '0.5rem', marginTop: '0 !important' }}>
                 <Row>
                     <Col xs={12}>
                         {props.children}
                     </Col>
+                    <Col xs={12}>
+                        <ControllerBox />
+                    </Col>
                 </Row>
             </Container>
 
-            <Navbar bg="dark" fixed="bottom" style={{ padding: 0 }}>
+            {/* <Navbar bg="dark" fixed="bottom" style={{ padding: 0 }}>
                 <Container>
                     <Row>
                         <Col xs={12}>
@@ -110,7 +115,7 @@ function Layout(props) {
                         </Col>
                     </Row>
                 </Container>
-            </Navbar>
+            </Navbar> */}
 
         </>
     );
