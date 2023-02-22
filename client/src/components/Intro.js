@@ -74,7 +74,10 @@ const Intro = (props) => {
 
     const [show, setShow] = useState(false);
 
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setShow(false);
+        dispatch(gameActions.disableKeylisteners({ set: false }));
+    }
 
 
     useEffect(() => {
@@ -117,7 +120,7 @@ const Intro = (props) => {
             //console.log(fresjson);
             if (fresjson?.name === newGallery) {
                 // it worked
-                dispatch(gameActions.setUserWallet({ address: e.target[0].value, gallery: newGallery.split(",")[0], galleryName: newGallery.split(",")[1], jwt: `BEARER ${fresjson?.token}` }));//.login({ ownedWallets: [], ccid: newGallery, ccjwt: `BEARER ${fresjson?.token}` })
+                dispatch(gameActions.setUserWallet({ address: e.target[0].value, gallery: newGallery.split(",")[0], galleryName: newGallery.split(",")[1], jwt: `BEARER ${fresjson?.token}` }));
                 localStorage.setItem("gogallery", newGallery);
                 navigate(`/${newGallery.split(",")[0]}/a_team/`);
 
@@ -133,22 +136,6 @@ const Intro = (props) => {
 
     };
 
-    const handleLoadGallery = async (e) => {
-        e.preventDefault();
-
-
-        //window.location.href = `/v1/`;
-        try {
-
-            navigate("/g/" + e.target[0].value);
-
-
-
-        } catch (ex) {
-            console.log("Gallery EX", ex);
-        }
-
-    };
 
 
     const getNewSecret = async () => {
@@ -174,7 +161,8 @@ const Intro = (props) => {
 
             if (action === 'NEW GAME') {
                 // TODO: Create new gallery
-
+                dispatch(gameActions.disableKeylisteners({ set: true }));
+                console.log("DISABLE");
                 setShow(true);
 
             }
@@ -185,8 +173,10 @@ const Intro = (props) => {
 
 
                 setTimeout(() => {
-                    navigate(`/${lastCreatedAddress.split(",")[0]}/a_team`);
-                }, 2000);
+                    const lastGallery = lastCreatedAddress.split(",");
+                    dispatch(gameActions.setUserWallet({ gallery: lastGallery[0], galleryName: lastGallery[1] }));
+                    navigate(`/${lastGallery[0]}/a_team`);
+                }, 500);
             }
 
 
@@ -235,7 +225,7 @@ const Intro = (props) => {
                         <FormControl
                             type="hidden"
                             value={newGallery}
-                            style={{ fontSize: "2rem" }}
+                            style={{ fontSize: "1rem" }}
                             name={'findorflow'}
                             required={true}
                             readOnly
@@ -244,13 +234,14 @@ const Intro = (props) => {
                             type="text"
                             placeholder={'Save Name'}
                             value={newGallery.split(",")[1]}
-                            style={{ fontSize: "2rem" }}
+                            style={{ fontSize: "1rem", border: '0.2rem solid black' }}
                             name={'displayval'}
                             required={true}
+
                             readOnly
                         />
 
-                        <Button type="submit" onClick={getNewSecret}>Re-Roll</Button>
+                        <Button type="submit" variant={'secondary'} onClick={getNewSecret}>Re-Roll</Button>
 
                     </InputGroup>
 

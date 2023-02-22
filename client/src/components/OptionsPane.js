@@ -1,4 +1,4 @@
-import React, { cloneElement, useState, useEffect } from 'react';
+import React, { Children, cloneElement, useState, useEffect } from 'react';
 import SelectableWrapper from './SelectableWrapper';
 
 import useKeyPress from '../hooks/useKeyPress';
@@ -8,65 +8,98 @@ import { useDispatch, useSelector } from 'react-redux';
 import { gameActions } from '../store/gamestate';
 import useAudio from '../hooks/useAudio';
 import AudioPlayer from './AudioPlayer';
+import { useNavigate, useLocation } from "react-router-dom";
+import SFXMenu from './SFXMenu';
 
 const OptionsLabel = styled.span`
 font-size: 1.5rem;
+
+`
+const OnOffLabel = styled.div`
 position: relative;
-top: 0.3rem;
+left: 2rem;
+top:0.3rem;
 `
 
 const OptionsPane = (props) => {
 
-    const [selectedIndex, setSelectedIndex] = useState(0);
 
     const dispatch = useDispatch();
 
     const BGMState = useSelector(state => state.gamestate.bgm_toggle);
     const SFXState = useSelector(state => state.gamestate.sfx_toggle);
 
-    const blip = useAudio([require('url:../../public/sfx/Move.wav')], false)[2];
+
     const huzuh = useAudio([require('url:../../public/sfx/Select.wav')], false)[2];
 
-    const downPress = useKeyPress("ArrowDown");
-    const upPress = useKeyPress("ArrowUp");
 
-    useEffect(() => {
-        if (selectableObjects.length && upPress) {
-            if (SFXState && selectedIndex > 0)
-                blip();
-            setSelectedIndex(prevState => (prevState > 0 ? prevState - 1 : prevState));
+    const navigate = useNavigate();
+
+
+
+
+    const menuHandler = (command) => {
+        switch (command) {
+            case 'BGM':
+                dispatch(gameActions.toggleBGM({ set: !BGMState }));
+                return;
+            case 'SFX':
+
+                dispatch(gameActions.toggleSFX({ set: !SFXState }));
+
+                return;
+            case 'New Team':
+                navigate("/");
+                return;
+            case 'Set Pin':
+                // TODO: Implement this
+                return;
         }
-    }, [upPress]);
+    };
 
-    useEffect(() => {
-        if (selectableObjects.length && downPress) {
-            if (SFXState && selectedIndex < selectableObjects.length - 1)
-                blip();
-            setSelectedIndex(prevState => prevState < selectableObjects.length - 1 ? prevState + 1 : prevState);
-        }
-    }, [downPress]);
 
-    // TODO: add row and col based selection with other arrow directions
-    // TODO: add keys for A/B
+    const selectableObjects2 = [
+        {
+            ctrl: <SelectableWrapper key={'bgm'} style={{ height: '3rem' }}>
+                <Container>
 
-    const selectableObjects = [
-        <SelectableWrapper key={'bgm'} onClick={(e) => { setSelectedIndex(0) }} isSelected={selectedIndex == 0}><OptionsLabel> BGM </OptionsLabel></SelectableWrapper>,
-        <SelectableWrapper key={'sfx'} onClick={(e) => { setSelectedIndex(1) }} isSelected={selectedIndex == 1}><OptionsLabel> SFX </OptionsLabel></SelectableWrapper>,
-        <SelectableWrapper key={'demo'} onClick={(e) => { setSelectedIndex(2) }} isSelected={selectedIndex == 2}><OptionsLabel> Load Demo </OptionsLabel></SelectableWrapper>
+                    <Row>
+                        <Col xs={2}><OptionsLabel> BGM </OptionsLabel></Col>
+                        <Col xs={5} onClick={() => { dispatch(gameActions.toggleBGM({ set: true })); }}><OnOffLabel>[{BGMState ? 'X' : ' '}] ON</OnOffLabel></Col>
+                        <Col xs={5} onClick={() => { dispatch(gameActions.toggleBGM({ set: false })); }}><OnOffLabel>[{!BGMState ? 'X' : ' '}] OFF</OnOffLabel></Col>
+                    </Row>
+                </Container>
+
+            </SelectableWrapper>, val: 'BGM'
+        },
+        {
+            ctrl: <SelectableWrapper key={'sfx'} style={{ height: '3rem' }}>
+                <Container>
+                    <Row>
+                        <Col xs={2}><OptionsLabel> SFX </OptionsLabel></Col>
+                        <Col xs={5} onClick={() => { dispatch(gameActions.toggleSFX({ set: true })); huzuh(); }}><OnOffLabel>[{SFXState ? 'X' : ' '}] ON</OnOffLabel></Col>
+                        <Col xs={5} onClick={() => { dispatch(gameActions.toggleSFX({ set: false })) }}><OnOffLabel>[{!SFXState ? 'X' : ' '}] OFF</OnOffLabel></Col>
+                    </Row>
+                </Container></SelectableWrapper>, val: 'SFX'
+        },
+        { ctrl: <SelectableWrapper key={'new'}> <OptionsLabel> New Team </OptionsLabel>  </SelectableWrapper>, val: 'New Team' },
+        { ctrl: <SelectableWrapper key={'pin'}> <OptionsLabel> Set PIN </OptionsLabel>  </SelectableWrapper>, val: 'Set Pin' }
+
     ];
 
-    // TODO: Use SFXMenu to cut down on code reuse
 
+
+    // TODO: Use SFXMenu to cut down on code reuse
     return <>
 
 
         <h3 style={{ margin: '3rem', fontSize: '3rem' }} className='title'>Options</h3>
 
         <div className={'nes-container with-title'} style={{ margin: '3rem' }}>
-            <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>Sound Settings</h3>
+            <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>System</h3>
 
-
-            {selectableObjects[0]}
+            <SFXMenu mainMenuHandler={menuHandler} selectableObjects={selectableObjects2} exiting={false} />
+            {/* {selectableObjects[0]}
             <Container>
                 <Row>
                     <Col></Col>
@@ -83,15 +116,16 @@ const OptionsPane = (props) => {
                     <Col onClick={() => { dispatch(gameActions.toggleSFX({ set: true })); huzuh(); }}>[{SFXState ? 'X' : ' '}] ON</Col>
                     <Col onClick={() => { dispatch(gameActions.toggleSFX({ set: false })) }}>[{!SFXState ? 'X' : ' '}] OFF</Col>
                 </Row>
-            </Container>
+            </Container> */}
 
         </div>
-
+        {/* 
         <div className={'nes-container with-title'} style={{ margin: '3rem' }}>
-            <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>Demo Mode</h3>
+            <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>System</h3>
 
             {selectableObjects[2]}
-        </div>
+            {selectableObjects[3]}
+        </div> */}
 
 
     </>;

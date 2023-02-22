@@ -9,12 +9,13 @@ const LoadWallet = (props) => {
         <Form onSubmit={props.onSubmit}>
             <InputGroup className="mb-3">
                 <FormControl
-                    style={{ fontSize: '2rem' }}
+                    style={{ fontSize: '1.4rem', border: '0.2rem solid black' }}
                     type="text"
                     placeholder={props.label}
                     value={walletAddress ? walletAddress : props.default}
                     onChange={(e) => setWalletAddress(e.target.value)}
                     pattern={props.pattern}
+
                 />
                 <Button type="submit"><img src={require('../../public/GoLogoPNG.png')} style={{ imageRendering: 'pixelated', height: '4rem' }} /></Button>
             </InputGroup>

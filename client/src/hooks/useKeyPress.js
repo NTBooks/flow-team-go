@@ -1,21 +1,28 @@
 /* Adapted from: https://stackoverflow.com/questions/42036865/react-how-to-navigate-through-list-by-arrow-keys */
 import React, { cloneElement, useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 const useKeyPress = function (targetKey) {
     const [keyPressed, setKeyPressed] = useState(false);
 
+    const disableKeylisteners = useSelector(state => state.gamestate.disableKeylisteners);
 
     React.useEffect(() => {
         function downHandler(e) {
 
+            if (disableKeylisteners) return;
+
             if (e.key === targetKey) {
                 e.preventDefault();
                 setKeyPressed(true);
+                console.log("KEY PRESSED", e.key, disableKeylisteners)
             }
 
         }
 
         const upHandler = (e) => {
+
+            if (disableKeylisteners) return;
 
             if (e.key === targetKey) {
                 e.preventDefault();
@@ -40,19 +47,12 @@ const useKeyPress = function (targetKey) {
             }, 10);
 
 
-            // window.dispatchEvent(new KeyboardEvent('keydown', {
-            //     'key': e.key
-            // }));
-
-            // window.dispatchEvent(new KeyboardEvent('keyup', {
-            //     'key': e.key
-            // }));
-
-            console.log("FAKE KEY: " + e.key);
         }
 
         window.addEventListener("keydown", downHandler);
         window.addEventListener("keyup", upHandler);
+
+
 
         document.addEventListener("fakekeypress", fakeHandler);
 
@@ -61,7 +61,7 @@ const useKeyPress = function (targetKey) {
             window.removeEventListener("keyup", upHandler);
             document.removeEventListener("fakekeypress", fakeHandler);
         };
-    }, [targetKey]);
+    }, [targetKey, disableKeylisteners]);
 
     return keyPressed;
 };

@@ -10,7 +10,8 @@ const initialGameState = {
     network: 'demo',
     jwt: '',
     galleryName: '',
-    gallery: ''
+    gallery: '',
+    disableKeylisteners: false
 
 };
 
@@ -23,6 +24,9 @@ const gameSlice = createSlice({
             state.gallery = action.payload.gallery;
             state.galleryName = action.payload.galleryName;
             state.jwt = action.payload.jwt;
+        },
+        disableKeylisteners(state, action) {
+            state.disableKeylisteners = action.payload.set;
         },
         addToTeam(state, action) {
             // TODO: write add to team logic

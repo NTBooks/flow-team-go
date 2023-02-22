@@ -3,7 +3,7 @@ import styled, { keyframes } from 'styled-components';
 import { useSelector } from 'react-redux';
 import useAudio from '../hooks/useAudio';
 // TODO: Animate X position when changing
-
+import { useDispatch } from 'react-redux';
 
 
 const OverlapTabContainer = styled.div`
@@ -70,6 +70,8 @@ const NESTabs = (props) => {
     const collapsedA = <CollapseImage src={require("../../public/AButton.png")}></CollapseImage>;
     const collapsedB = <CollapseImage src={require("../../public/BButton.png")}></CollapseImage>;
     const collapsedOpt = <CollapseImage src={require("../../public/GearButton.png")}></CollapseImage>;
+
+
 
     return <OverlapTabContainer>
         <RText onClick={(e) => { props.setTab(3) }}>PAGE<RTextImage src={require("../../public/SmControllerRight.png")}></RTextImage></RText>
