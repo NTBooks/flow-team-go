@@ -298,7 +298,10 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
                 try {
                     console.log("Attempt unlink.");
                     // delete the file after 5 mins
+                    if (fs.existsSync(cacheFile)) {
 
+                        fs.unlinkSync(cacheFile);
+                    }
                 } catch {
                     console.log("Failed to delete cache file.");
                 }
@@ -370,7 +373,7 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
 
         //gallery_status: await db.getTeamStatus(gallery)
 
-        res.send({ catalogSize: catalogSize, owner: wallet_addr, user_status: status, nfts: NFTList, cache_served });
+        res.send({ gallery: gallery, catalogSize: catalogSize, owner: wallet_addr, user_status: status, nfts: NFTList, cache_served });
 
     } catch (ex) {
         res.statusCode = 403;

@@ -10,6 +10,7 @@ import Intro from "./Intro";
 import AudioPlayer from "./AudioPlayer";
 import AboutPane from "./AboutPane";
 import styled from "styled-components";
+import GalleryLoader from "./GalleryLoader";
 
 const router = createBrowserRouter([
     {
@@ -22,15 +23,15 @@ const router = createBrowserRouter([
     },
     {
         path: "/:gallery",
-        element: <><GameScreen><TeamPane letter="A" /></GameScreen></>,
+        element: <><GameScreen><TeamPane letter="A" key="teamA" /></GameScreen></>,
     },
     {
         path: "/:gallery/a_team",
-        element: <><GameScreen><TeamPane letter="A" /></GameScreen></>,
+        element: <><GameScreen><TeamPane letter="A" key="teamA" /></GameScreen></>,
     },
     {
         path: "/:gallery/b_team",
-        element: <><GameScreen><TeamPane letter="B" /></GameScreen></>,
+        element: <><GameScreen><TeamPane letter="B" key="teamB" /></GameScreen></>,
     },
     {
         path: "/options",
@@ -56,6 +57,7 @@ const App = () => {
                 <AudioPlayer loop={true} />
                 <RouterProvider router={router} />
 
+                <GalleryLoader />
             </Layout>
 
         </HelmetProvider>);

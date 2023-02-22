@@ -11,7 +11,8 @@ const initialGameState = {
     jwt: '',
     galleryName: '',
     gallery: '',
-    disableKeylisteners: false
+    disableKeylisteners: false,
+    loadedGallery: {}
 
 };
 
@@ -24,6 +25,9 @@ const gameSlice = createSlice({
             state.gallery = action.payload.gallery;
             state.galleryName = action.payload.galleryName;
             state.jwt = action.payload.jwt;
+        },
+        setGalleryData(state, action) {
+            state.loadedGallery = action.payload.data;
         },
         disableKeylisteners(state, action) {
             state.disableKeylisteners = action.payload.set;
