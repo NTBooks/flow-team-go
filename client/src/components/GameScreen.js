@@ -56,11 +56,7 @@ box-shadow: 0px 0px 1rem #FFFFFF;
 const GameScreen = (props) => {
 
   const navigate = useNavigate();
-
   const location = useLocation();
-  console.log(location);
-
-
   const rightPress = useKeyPress("ArrowRight");
   const leftPress = useKeyPress("ArrowLeft");
   const currWallet = useSelector(state => state.gamestate.gallery);

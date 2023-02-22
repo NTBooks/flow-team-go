@@ -109,8 +109,8 @@ const ControllerBox = () => {
             <ControllerLeftButton onClick={(e) => { simulateKey('ArrowLeft') }} />
             <ControllerRightButton onClick={(e) => { simulateKey('ArrowRight') }} />
         </ControllerCross>
-        <ControllerAButton />
-        <ControllerBButton />
+        <ControllerAButton onClick={(e) => { simulateKey('a') }} />
+        <ControllerBButton onClick={(e) => { simulateKey('b') }} />
 
     </ControllerPanel>;
 

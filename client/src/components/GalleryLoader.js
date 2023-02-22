@@ -6,6 +6,15 @@ import Card from 'react-bootstrap/Card';
 import Spinner from 'react-bootstrap/Spinner';
 import { useSelector } from "react-redux";
 
+import styled from 'styled-components';
+
+const Floater = styled.div`
+position: fixed;
+top:0;
+left:0;
+opacity: 0.5;
+`
+
 const GalleryLoader = (props) => {
 
     const dispatch = useDispatch();
@@ -37,12 +46,12 @@ const GalleryLoader = (props) => {
 
     }, [gallery]);
 
-    return <>
+    return <Floater>
         {
-            gallery ? (loaded ? <Card>Loaded Wallet Data</Card> : <Card><Spinner> </Spinner>Loading NFT collection...</Card>) : <></>
+            gallery ? (loaded ? <></> : <Card style={{ width: '32rem', paddingLeft: '5rem' }}><Spinner style={{ position: 'absolute', left: '1rem', top: 0 }}></Spinner><span style={{ display: 'inline-block', whiteSpace: 'nowrap', padding: '0.3rem' }}>Loading NFT collection...</span></Card>) : <></>
         }
 
-    </>
+    </Floater>
 
 
 }

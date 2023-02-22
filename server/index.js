@@ -329,7 +329,7 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
                         ],
                     });
                     for (let [key, value] of Object.entries(response)) {
-                        if (NFTList[key] === undefined) {
+                        if (NFTList[key] === undefined && value && value.length > 0) {
                             NFTList[key] = [];
                         }
                         if (value && value.length > 0) {
