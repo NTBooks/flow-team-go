@@ -213,7 +213,7 @@ const Intro = (props) => {
     return <><FadeContainer style={{ opacity: exiting ? 0 : 1 }}>
         <TitleImage />
         <TopContainer><FlexItem>2023 Nick Tantillo<br />released under MIT license.</FlexItem></TopContainer>
-        <SFXMenu mainMenuHandler={mainMenuHandler} selectableObjects={selectableObjects} exiting={exiting} />
+        <SFXMenu setkey="mmsfx" mainMenuHandler={mainMenuHandler} selectableObjects={selectableObjects} exiting={exiting} />
 
 
 

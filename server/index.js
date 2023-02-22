@@ -293,19 +293,19 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
             // TODO: Check file data
             // For now, delete the file after 5 mins just in case it's old. Cron would be better for cleaning this dir but it's overkill
 
-            console.log("Cache queued for deletion.");
-            setTimeout(() => {
-                try {
-                    console.log("Attempt unlink.");
-                    // delete the file after 5 mins
-                    if (fs.existsSync(cacheFile)) {
+            // console.log("Cache queued for deletion.", new Date());
+            // setTimeout(() => {
+            //     try {
+            //         console.log("Attempt unlink.", new Date());
+            //         // delete the file after 5 mins
+            //         if (fs.existsSync(cacheFile)) {
 
-                        fs.unlinkSync(cacheFile);
-                    }
-                } catch {
-                    console.log("Failed to delete cache file.");
-                }
-            }, 60 * 1000 * 5);
+            //             fs.unlinkSync(cacheFile);
+            //         }
+            //     } catch {
+            //         console.log("Failed to delete cache file.");
+            //     }
+            // }, 60 * 1000 * 5);
 
 
         }

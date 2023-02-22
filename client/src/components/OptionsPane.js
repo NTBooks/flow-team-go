@@ -49,6 +49,7 @@ const OptionsPane = (props) => {
 
                 return;
             case 'New Team':
+                dispatch(gameActions.setGalleryData({ data: null }));
                 navigate("/");
                 return;
             case 'Set Pin':
@@ -98,7 +99,7 @@ const OptionsPane = (props) => {
         <div className={'nes-container with-title'} style={{ margin: '3rem' }}>
             <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>System</h3>
 
-            <SFXMenu mainMenuHandler={menuHandler} selectableObjects={selectableObjects2} exiting={false} />
+            <SFXMenu setkey="optsfx" mainMenuHandler={menuHandler} selectableObjects={selectableObjects2} exiting={false} />
             {/* {selectableObjects[0]}
             <Container>
                 <Row>

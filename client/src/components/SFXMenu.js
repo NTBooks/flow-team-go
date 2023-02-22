@@ -37,6 +37,7 @@ const SFXMenu = (props) => {
             if (SFXState && selectedIndex > 0)
                 blip();
             setSelectedIndex(prevState => (prevState > 0 ? prevState - 1 : prevState));
+            document.getElementById("flex" + (selectedIndex - 1))?.scrollIntoView();
         }
     }, [upPress]);
 
@@ -45,6 +46,8 @@ const SFXMenu = (props) => {
             if (SFXState && selectedIndex < selectableObjects.length - 1)
                 blip();
             setSelectedIndex(prevState => prevState < selectableObjects.length - 1 ? prevState + 1 : prevState);
+            document.getElementById("flex" + (selectedIndex - 1))?.scrollIntoView();
+
         }
     }, [downPress]);
 
@@ -59,10 +62,15 @@ const SFXMenu = (props) => {
     }, [aPress, enterPress, spacePress]);
 
     useEffect(() => {
-        if (!exiting && selectableObjects.length && bPress) {
-            if (SFXState && selectedIndex < selectableObjects.length - 1)
-                cancel();
+
+        if (!exiting && bPress) {
+
+            cancel();
             //setSelectedIndex(prevState => prevState < selectableObjects.length - 1 ? prevState + 1 : prevState);
+
+            if (props.onCancel) {
+                props.onCancel();
+            }
         }
     }, [bPress]);
 
@@ -70,9 +78,9 @@ const SFXMenu = (props) => {
 
         const onCl = (e) => { console.log(i); setSelectedIndex(+i) };
         if (selectedIndex == i)
-            return <FlexItem style={selectableObjects[i].ctrl.props.style} key={'flex' + i}><div>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, isSelected: true, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</div></FlexItem>;
+            return <FlexItem style={selectableObjects[i].ctrl.props.style} key={(props.setkey ? props.setkey : 'flex') + i} id={'flex' + i}><div>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, isSelected: true, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</div></FlexItem>;
 
-        return <FlexItem style={selectableObjects[i].ctrl.props.style} key={'flex' + i}><div>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</div></FlexItem>;
+        return <FlexItem style={selectableObjects[i].ctrl.props.style} key={(props.setkey ? props.setkey : 'flex') + i} id={'flex' + i}><div>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</div></FlexItem>;
 
     });
 

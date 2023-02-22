@@ -12,7 +12,7 @@ const initialGameState = {
     galleryName: '',
     gallery: '',
     disableKeylisteners: false,
-    loadedGallery: {}
+    loadedGallery: null
 
 };
 
@@ -28,6 +28,10 @@ const gameSlice = createSlice({
         },
         setGalleryData(state, action) {
             state.loadedGallery = action.payload.data;
+            if (action.payload.data === null) {
+                // handle reset
+                state.gallery = '';
+            }
         },
         disableKeylisteners(state, action) {
             state.disableKeylisteners = action.payload.set;
