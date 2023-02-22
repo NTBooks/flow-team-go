@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from "styled-components";
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -71,7 +71,6 @@ const Intro = (props) => {
     const [submittedCreate, setSubmittedCreate] = useState(false);
     const [lastCreatedAddress, setLastCreatedAddress] = useState("");
 
-
     const [show, setShow] = useState(false);
 
     const handleClose = () => {
@@ -84,6 +83,7 @@ const Intro = (props) => {
 
         setLastCreatedAddress(localStorage.getItem("gogallery"));
         getNewSecret();
+
 
     }, []);
 
@@ -123,6 +123,7 @@ const Intro = (props) => {
                 dispatch(gameActions.setUserWallet({ address: e.target[0].value, gallery: newGallery.split(",")[0], galleryName: newGallery.split(",")[1], jwt: `BEARER ${fresjson?.token}` }));
                 localStorage.setItem("gogallery", newGallery);
                 navigate(`/${newGallery.split(",")[0]}/a_team/`);
+                dispatch(gameActions.disableKeylisteners({ set: false }));
 
             } else {
                 // setError to message
@@ -165,6 +166,7 @@ const Intro = (props) => {
                 console.log("DISABLE");
                 setShow(true);
 
+
             }
 
             if (action === 'CONTINUE') {
@@ -177,6 +179,11 @@ const Intro = (props) => {
                     dispatch(gameActions.setUserWallet({ gallery: lastGallery[0], galleryName: lastGallery[1] }));
                     navigate(`/${lastGallery[0]}/a_team`);
                 }, 500);
+            }
+
+            if (action === '/demo') {
+                handleSubmit({ preventDefault: () => { console.log("Making a new gallery with a known wallet.") }, target: [{ value: 'bjartek.find' }] });
+                // todo: instead load a preconfigured gallery
             }
 
 
@@ -245,7 +252,7 @@ const Intro = (props) => {
 
                     </InputGroup>
 
-                    <LoadWallet label=".find or Flow Address" onSubmit={handleSubmit} pattern="(^0x[a-fA-F0-9]{16}$)|(.+\.[Ff][Ii][Nn][Dd])" />
+                    <LoadWallet focus={show} label=".find or Flow Address" onSubmit={handleSubmit} pattern="(^0x[a-fA-F0-9]{16}$)|(.+\.[Ff][Ii][Nn][Dd])" />
                     {errorMessage && <Alert variant={'danger'}>{errorMessage}</Alert>}
                     <p style={{ textAlign: 'center' }}>Please enter your <img src={require('../../public/find_logo.png')} style={{ height: '1rem', marginTop: '-0.4rem' }} /> address <br />or your wallet address starting with "0x"</p>
                 </> : <Alert variant={'info'}><Spinner></Spinner> Loading...</Alert>

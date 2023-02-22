@@ -120,7 +120,7 @@ module.exports = {
     },
     getWallet: async (username) => {
         try {
-            return await db.all("SELECT address, chain FROM Wallets WHERE userName = ?", [username]);
+            return await db.all("SELECT address, chain FROM Wallets WHERE userName like ?||',%'", [username]);
 
         } catch (dbError) {
             console.error(dbError);
@@ -162,7 +162,7 @@ module.exports = {
     getTeamStatus: async (username) => {
         try {
             const option = await db.all(
-                `SELECT * FROM Status WHERE userName = ?
+                `SELECT * FROM Status WHERE userName like ?||',%'
               `
                 , [username]
             );
