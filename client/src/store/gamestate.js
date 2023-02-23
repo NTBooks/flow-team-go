@@ -40,7 +40,7 @@ const gameSlice = createSlice({
                     const teamArray = JSON.parse(action.payload.data.teams);
 
                     state.team_a = teamArray.slice(0, 3);
-                    state.team_b = teamArray.slice(3, 3);
+                    state.team_b = teamArray.slice(3);
                 }
             } catch {
 

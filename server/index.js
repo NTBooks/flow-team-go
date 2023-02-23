@@ -222,7 +222,7 @@ app.post("/v1/updateteam", authenticateToken, async (req, res) => {
                 return null; // Keep nulls as placeholders
             }
 
-            if (!/^[A-Za-z_0-9]{5,}$/.test(x.collection)) {
+            if (!/^[A-Za-z_0-9]{2,}$/.test(x.collection)) {
                 throw { message: "data corrupt" };
             }
 
@@ -259,6 +259,7 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
         // TODO: Add a sqlite table for wallet caches that live at least 5 mins
 
         const gallery = req.paramString("gallery");
+        const mode = req.queryString("view") == true;
 
         // TODO: Get user customizations too
 
@@ -363,6 +364,8 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
             });
 
 
+
+
             zip.file("nfts.txt", JSON.stringify(NFTList));
 
             zip
@@ -389,6 +392,15 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
         }
 
         //gallery_status: await db.getTeamStatus(gallery)
+
+        // Generate relevent NFT data only and save to the DB
+        // state.gamestate.loadedGallery.nfts[props.data.collection]?.find(x => x.id == props.data.id)
+        const relevantTeamNFTs = teamData.length > 0 ? JSON.parse(teamData[0].team).filter(x => x !== null).map(teammember => {
+
+            return NFTList[teammember.collection]?.find(x => x.id == teammember.id)
+        }) : [];
+
+        console.log(relevantTeamNFTs);
 
         res.send({ gallery: gallery, catalogSize: catalogSize, owner: wallet_addr, user_status: status, nfts: NFTList, teams: teamData.length > 0 ? teamData[0].team : null, cache_served });
 

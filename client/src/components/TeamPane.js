@@ -104,9 +104,18 @@ const TeamPane = (props) => {
     };
 
     const [aniText, setAniText] = useState(null);
-    const [aniTextInterval, setAniTextInterval] = useState(null);
+    const [stopText, setStopText] = useState(false);
 
     useEffect(() => {
+        if (galleryData) {
+            setStopText();
+        }
+    }, [galleryData]);
+
+    useEffect(() => {
+        if (stopText) {
+            return;
+        }
 
         const interval = setInterval(() => {
             console.log("Interval: ", interval, galleryData);
@@ -121,7 +130,7 @@ const TeamPane = (props) => {
 
         }, 6000);
 
-        setAniTextInterval(interval);
+
 
         setTimeout(() => {
             setAniText(funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)]);
@@ -130,23 +139,12 @@ const TeamPane = (props) => {
 
         return () => {
             clearInterval(interval);
-            setAniTextInterval(null);
+
 
         }
 
-    }, []);
+    }, [stopText]);
 
-    // useEffect(() => {
-
-    //     console.log(aniText, aniTextInterval, galleryData !== null);
-
-    //     if (aniTextInterval && galleryData !== null) {
-
-    //         clearInterval(aniTextInterval);
-    //         setAniTextInterval(null);
-
-    //     }
-    // }, [aniText]);
 
 
     const [saving, setIsSaving] = useState();
@@ -157,7 +155,7 @@ const TeamPane = (props) => {
         // Make sure not a dupe
         let allNFTs = [...unboundGameState.team_a, ...unboundGameState.team_b];
 
-        if (allNFTs.find(x => x !== null && (x.collection === e.collection) && (x.id === e.id))) {
+        if (allNFTs.find(x => x && (x.collection === e.collection) && (x.id === e.id))) {
             return;
         }
 
@@ -213,7 +211,7 @@ const TeamPane = (props) => {
         {galleryData === null ?
             (aniText ?
                 <div className={'nes-container with-title'} style={{ margin: '3rem', textAlign: 'center' }}>
-                    <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>Loading</h3>
+                    <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>Loading Wallet...</h3>
                     <AnimatedText
                         type="chars" // animate words or chars
                         animation={{
