@@ -34,6 +34,10 @@ const router = createBrowserRouter([
         element: <><GameScreen><TeamPane letter="B" key="teamB" /></GameScreen></>,
     },
     {
+        path: "/versus",
+        element: <><GameScreen>Versus</GameScreen></>,
+    },
+    {
         path: "/options",
         element: <><GameScreen><OptionsPane /></GameScreen></>,
     },

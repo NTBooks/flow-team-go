@@ -71,12 +71,13 @@ const NESTabs = (props) => {
     const collapsedB = <CollapseImage src={require("../../public/BButton.png")}></CollapseImage>;
     const collapsedOpt = <CollapseImage src={require("../../public/GearButton.png")}></CollapseImage>;
 
-
+    console.log(currTab);
 
     return <OverlapTabContainer>
-        <RText onClick={(e) => { props.setTab(3) }}>PAGE<RTextImage src={require("../../public/SmControllerRight.png")}></RTextImage></RText>
-        <OverlapTab onClick={(e) => { props.setTab(2) }} style={{ left: '6rem' }} width={currTab < 4 ? '26rem' : '2rem'} color="#209CEE">{currTab == 3 ? 'Options' : ''}{collapsedOpt}<StubImage src={require("../../public/TabStubBU.png")}></StubImage></OverlapTab>
-        <OverlapTab onClick={(e) => { props.setTab(1) }} style={{ left: '3rem' }} width={currTab < 3 ? '20rem' : '2rem'} color="#92CC41">{currTab == 2 ? 'Standby' : ''}{collapsedB}<StubImage src={require("../../public/TabStubGR.png")}></StubImage></OverlapTab>
+        <RText onClick={(e) => { props.setTab(4) }}>PAGE<RTextImage src={require("../../public/SmControllerRight.png")}></RTextImage></RText>
+        <OverlapTab onClick={(e) => { props.setTab(3) }} style={{ left: '9rem' }} width={currTab < 5 ? '24rem' : '2rem'} color="#515151">{currTab == 4 ? 'Options' : ''}{collapsedOpt}<StubImage src={require("../../public/TabStubSlate.png")}></StubImage></OverlapTab>
+        <OverlapTab onClick={(e) => { props.setTab(2) }} style={{ left: '6rem' }} width={currTab < 4 ? '22rem' : '2rem'} color="#209CEE">{currTab == 3 ? 'Versus' : ''}{collapsedOpt}<StubImage src={require("../../public/TabStubBU.png")}></StubImage></OverlapTab>
+        <OverlapTab onClick={(e) => { props.setTab(1) }} style={{ left: '3rem' }} width={currTab < 3 ? '19rem' : '2rem'} color="#92CC41">{currTab == 2 ? 'Standby' : ''}{collapsedB}<StubImage src={require("../../public/TabStubGR.png")}></StubImage></OverlapTab>
         <OverlapTab onClick={(e) => { props.setTab(0) }} width={currTab == 1 ? '14rem' : '2rem'} color="#E76E55">{currTab == 1 ? 'Champs' : ''
         }{collapsedA}<StubImage src={require("../../public/TabStubR.png")}></StubImage></OverlapTab>
     </OverlapTabContainer >

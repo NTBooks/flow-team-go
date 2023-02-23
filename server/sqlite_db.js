@@ -36,11 +36,11 @@ dbWrapper
                 );
 
                 await db.run(
-                    "CREATE TABLE Wallets (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, address TEXT, chain TEXT, verified INT)"
+                    "CREATE TABLE Wallets (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, address TEXT, alias TEXT, chain TEXT, verified INT)"
                 );
 
                 await db.run(
-                    "CREATE TABLE NFTStats (id INTEGER PRIMARY KEY AUTOINCREMENT, collection TEXT, nftid INT, chain TEXT, health INT, level INT)"
+                    "CREATE TABLE NFTStats (id INTEGER PRIMARY KEY AUTOINCREMENT, collection TEXT, nftid INT, chain TEXT, health INT, level INT, content TEXT)"
                 );
             }
         } catch (dbError) {
@@ -124,22 +124,22 @@ module.exports = {
     },
     getWallet: async (username) => {
         try {
-            return await db.all("SELECT address, chain FROM Wallets WHERE userName like ?||',%'", [username]);
+            return await db.all("SELECT address, chain, alias FROM Wallets WHERE userName like ?||',%'", [username]);
 
         } catch (dbError) {
             console.error(dbError);
         }
 
     },
-    linkWallet: async (username, address, chain) => {
+    linkWallet: async (username, address, alias, chain) => {
         try {
 
             const option = await db.all(
-                `INSERT INTO Wallets (userName, address, chain, verified) 
-                SELECT ?, ?, ?, 0
-                WHERE NOT EXISTS(SELECT 1 FROM Wallets WHERE userName = ? AND address = ? AND chain = ?)`
+                `INSERT INTO Wallets (userName, address, alias, chain, verified) 
+                SELECT ?, ?, ?, ?, 0
+                WHERE NOT EXISTS(SELECT 1 FROM Wallets WHERE userName = ? AND address = ? AND chain = ? AND alias = ?)`
 
-                , [username, address, chain, username, address, chain]
+                , [username, address, alias, chain, username, address, chain, alias]
             );
 
 

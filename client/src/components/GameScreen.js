@@ -61,7 +61,7 @@ const GameScreen = (props) => {
   const leftPress = useKeyPress("ArrowLeft");
   const currWallet = useSelector(state => state.gamestate.gallery);
 
-  const selectableObjects = [`/${currWallet}/a_team`, `/${currWallet}/b_team`, '/options', '/about'];
+  const selectableObjects = [`/${currWallet}/a_team`, `/${currWallet}/b_team`, '/versus', '/options', '/about'];
   const pathnamepart = location.pathname.substring(location.pathname.lastIndexOf("/"));
 
   const [selectedIndex, setSelectedIndex] = useState(0);
