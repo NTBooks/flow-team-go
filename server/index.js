@@ -212,12 +212,27 @@ app.post("/v1/checktoken", authenticateToken, async (req, res) => {
 });
 
 
-app.post("/v1/markteam", authenticateToken, async (req, res) => {
+app.post("/v1/updateteam", authenticateToken, async (req, res) => {
     try {
-        const nftid = req.bodyString("nftid");
-        const status = req.bodyString("team");
 
-        await db.markTeam(req.user.userName, nftid, team);
+        const team = req.body.team;
+
+        const cleanedTeam = team.map(x => {
+            if (x === null) {
+                return null; // Keep nulls as placeholders
+            }
+
+            if (!/^[A-Za-z_0-9]{5,}$/.test(x.collection)) {
+                throw { message: "data corrupt" };
+            }
+
+
+            return { collection: x.collection, id: +x.id }
+        })
+
+        // Team should be an array of 6 {id, collection}
+
+        await db.updateTeam(req.user.userName, cleanedTeam);
 
 
         // Send a fresh token
@@ -249,6 +264,13 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
 
         // get user's NFTs
         const wallet = await db.getWallet(gallery);
+
+        const teamData = await db.getTeamStatus(gallery);
+
+        if (wallet.length <= 0) {
+            throw { message: "Gallery does not exist." };
+        }
+
         const wallet_addr = wallet[0].address;
 
         const catalogSize = await fcl.query({
@@ -341,11 +363,6 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
             });
 
 
-
-
-
-
-
             zip.file("nfts.txt", JSON.stringify(NFTList));
 
             zip
@@ -373,7 +390,7 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
 
         //gallery_status: await db.getTeamStatus(gallery)
 
-        res.send({ gallery: gallery, catalogSize: catalogSize, owner: wallet_addr, user_status: status, nfts: NFTList, cache_served });
+        res.send({ gallery: gallery, catalogSize: catalogSize, owner: wallet_addr, user_status: status, nfts: NFTList, teams: teamData.length > 0 ? teamData[0].team : null, cache_served });
 
     } catch (ex) {
         res.statusCode = 403;

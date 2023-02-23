@@ -33,9 +33,9 @@ color: black;
 const NFTPreviewCard = (props) => {
     // Get NFT ID, load it from the gamestate
 
-    const myNFT = useSelector(state => state.gamestate.loadedGallery.nfts[props.data.collection].find(x => x.id === props.data.id));
+    const myNFT = useSelector(state => state.gamestate.loadedGallery.nfts[props.data.collection]?.find(x => x.id == props.data.id));
 
-    console.log(myNFT);
+    console.log(myNFT, props.data);
 
     return !props.data || !myNFT ? <NFTTitle>Not Loaded. </NFTTitle> :
         <NFTBezel>        <Container>
@@ -52,7 +52,7 @@ const NFTPreviewCard = (props) => {
                         </Row>
                         <Row>
 
-                            <Col>HP<progress class="nes-progress is-error" value="10" max="100" style={{ height: '1rem', width: '18rem' }}></progress></Col>
+                            <Col>HP<progress className="nes-progress is-error" value="10" max="100" style={{ height: '1rem', width: '18rem' }}></progress></Col>
                         </Row>
                         <Row>
 

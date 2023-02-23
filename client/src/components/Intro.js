@@ -173,6 +173,26 @@ const Intro = (props) => {
                 // TODO: Load Last Gallery, make this option only available if there's state data in localstate
                 setIsExiting(true);
 
+                const tempPin = localStorage.getItem("temp_" + lastCreatedAddress);
+
+
+                if (tempPin) {
+                    (async () => {
+
+                        console.log("TEMP PIN", tempPin)
+                        const fres = await fetch('/v1/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ gallery: lastCreatedAddress, pin: tempPin }) });
+                        const fresjson = await fres.json();
+
+                        if (fresjson?.token) {
+
+                            dispatch(gameActions.setJwt({ jwt: `BEARER ${fresjson?.token}` }));
+                            localStorage.setItem("token_" + lastCreatedAddress, fresjson?.token);
+
+                        }
+
+                    })();
+                }
+
 
                 setTimeout(() => {
                     const lastGallery = lastCreatedAddress.split(",");

@@ -24,13 +24,26 @@ const gameSlice = createSlice({
             state.userWallet = action.payload.address;
             state.gallery = action.payload.gallery;
             state.galleryName = action.payload.galleryName;
-            state.jwt = action.payload.jwt;
+
+            if (action.payload.jwt && action.payload.jwt !== '')
+                state.jwt = action.payload.jwt;
         },
         setGalleryData(state, action) {
             state.loadedGallery = action.payload.data;
             if (action.payload.data === null) {
                 // handle reset
                 state.gallery = '';
+            }
+
+            try {
+                if (action.payload.data.teams) {
+                    const teamArray = JSON.parse(action.payload.data.teams);
+
+                    state.team_a = teamArray.slice(0, 3);
+                    state.team_b = teamArray.slice(3, 3);
+                }
+            } catch {
+
             }
         },
         disableKeylisteners(state, action) {
@@ -66,6 +79,9 @@ const gameSlice = createSlice({
         },
         setNetwork(state, action) {
             state.network = action.payload.network;
+        },
+        setJwt(state, action) {
+            state.jwt = action.payload.jwt;
         }
 
 

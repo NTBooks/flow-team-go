@@ -32,7 +32,7 @@ dbWrapper
                 );
 
                 await db.run(
-                    "CREATE TABLE Team (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, nftID TEXT, team TEXT)"
+                    "CREATE TABLE Team (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, team TEXT)"
                 );
 
                 await db.run(
@@ -40,7 +40,7 @@ dbWrapper
                 );
 
                 await db.run(
-                    "CREATE TABLE NFTStats (id INTEGER PRIMARY KEY AUTOINCREMENT, collection TEXT, id INT, chain TEXT, health INT, level INT)"
+                    "CREATE TABLE NFTStats (id INTEGER PRIMARY KEY AUTOINCREMENT, collection TEXT, nftid INT, chain TEXT, health INT, level INT)"
                 );
             }
         } catch (dbError) {
@@ -166,7 +166,7 @@ module.exports = {
     getTeamStatus: async (username) => {
         try {
             const option = await db.all(
-                `SELECT * FROM Status WHERE userName like ?||',%'
+                `SELECT * FROM Team WHERE userName like ?||',%' ORDER BY id ASC LIMIT 1
               `
                 , [username]
             );
@@ -176,44 +176,29 @@ module.exports = {
             console.error(dbError);
         }
     },
-    markTeam: async (username, nftid, team) => {
+    updateTeam: async (username, team) => {
         try {
 
 
             const deleteOld = await db.all(
-                `DELETE FROM Status 
-                WHERE  userName = ? AND nftID = ? AND team = ?`
+                `DELETE FROM Team 
+                WHERE  userName = ?`
 
-                , [username, nftid, status]
+                , [username]
             );
 
             const option = await db.all(
-                `INSERT INTO Status (userName, nftID, status, value) VALUES (?, ?, ?)
+                `INSERT INTO Team (userName, team) VALUES (?, ?)
               `
 
-                , [username, nftid, team]
+                , [username, JSON.stringify(team)]
             );
 
             return option;
         } catch (dbError) {
             console.error(dbError);
         }
-    },
-    unmarkTeam: async (username, nftid, team) => {
-        try {
-
-            const option = await db.all(
-                `DELETE FROM Status 
-                WHERE  userName = ? AND nftID = ? AND team = ?`
-
-                , [username, nftid, team]
-            );
-
-            return option;
-        } catch (dbError) {
-            console.error(dbError);
-        }
-    },
+    }
 
 
 };

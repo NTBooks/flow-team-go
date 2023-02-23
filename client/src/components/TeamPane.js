@@ -149,19 +149,38 @@ const TeamPane = (props) => {
     // }, [aniText]);
 
 
+    const [saving, setIsSaving] = useState();
 
 
-    const addToTeam = (e) => {
+    const addToTeam = async (e) => {
 
         // Make sure not a dupe
-        const allNFTs = [...unboundGameState.team_a, ...unboundGameState.team_b];
-        console.log(allNFTs);
+        let allNFTs = [...unboundGameState.team_a, ...unboundGameState.team_b];
+
         if (allNFTs.find(x => x !== null && (x.collection === e.collection) && (x.id === e.id))) {
             return;
         }
-        console.log("HERE", e)
+
 
         dispatch(gameActions.addToTeam({ team: props.letter, position: selectedSlot, collection: e.collection, nftid: e.id }));
+
+        // Make the pseudo edit
+        allNFTs[(props.letter === 'B' ? 3 + selectedSlot : selectedSlot)] = { collection: e.collection, id: e.id };
+
+        const updateTeamResult = await fetch('/v1/updateteam', { method: 'POST', headers: { 'authorization': unboundGameState.jwt, 'content-type': 'application/json' }, body: JSON.stringify({ team: allNFTs }) });
+
+
+        if (updateTeamResult.status !== 200) {
+            console.log(updateTeamResult);
+            return;
+        }
+
+        // const updateTeamData = await updateTeamResult.json();
+
+        // if (updateTeamData?.message === "SUCCESS") {
+
+        // }
+
 
     }
 
