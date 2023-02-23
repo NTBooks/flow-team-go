@@ -51,9 +51,6 @@ const gameSlice = createSlice({
                 state.team_b[+action.payload.position] = arg;
             }
         },
-        removeFromTeam(state, action) {
-            // TODO: write remove from team logic
-        },
         toggleBGM(state, action) {
             // TODO: write logic to turn BGM on or off
 

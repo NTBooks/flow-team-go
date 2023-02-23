@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import NFTPlacholderCard from './NFTPlaceholderCard';
 import SFXMenu from './SFXMenu';
 import SelectableWrapper from './SelectableWrapper';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import Card from 'react-bootstrap/Card';
 import AnimatedText from 'react-animated-text-content';
 import SelectNFTPane from './SelectNFTPane';
@@ -32,6 +32,8 @@ const TeamPane = (props) => {
     const paneTeam1 = useSelector(state => props.letter === "A" ? state.gamestate.team_a[0] : state.gamestate.team_b[0]);
     const paneTeam2 = useSelector(state => props.letter === "A" ? state.gamestate.team_a[1] : state.gamestate.team_b[1]);
     const paneTeam3 = useSelector(state => props.letter === "A" ? state.gamestate.team_a[2] : state.gamestate.team_b[2]);
+
+    const unboundGameState = useStore().getState().gamestate;
 
     console.log("Pane1", paneTeam1);
 
@@ -150,6 +152,15 @@ const TeamPane = (props) => {
 
 
     const addToTeam = (e) => {
+
+        // Make sure not a dupe
+        const allNFTs = [...unboundGameState.team_a, ...unboundGameState.team_b];
+        console.log(allNFTs);
+        if (allNFTs.find(x => x !== null && (x.collection === e.collection) && (x.id === e.id))) {
+            return;
+        }
+        console.log("HERE", e)
+
         dispatch(gameActions.addToTeam({ team: props.letter, position: selectedSlot, collection: e.collection, nftid: e.id }));
 
     }

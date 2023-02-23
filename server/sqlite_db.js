@@ -38,6 +38,10 @@ dbWrapper
                 await db.run(
                     "CREATE TABLE Wallets (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, address TEXT, chain TEXT, verified INT)"
                 );
+
+                await db.run(
+                    "CREATE TABLE NFTStats (id INTEGER PRIMARY KEY AUTOINCREMENT, collection TEXT, id INT, chain TEXT, health INT, level INT)"
+                );
             }
         } catch (dbError) {
             console.error(dbError);

@@ -19,13 +19,15 @@ display: flex;
 `
 
 const NFTBezel = styled.div`
-
+max-height: 10.4rem;
+overflow: hidden;
 `
 
 const NFTTitle = styled.h3`
 position: relative;
 top: 0.5rem;
-font-size: ${props => props.len < 15 ? '1.5rem' : (2 * (15 * 1 / props.len)) + 'rem'};
+font-size: ${props => props.len < 15 ? '1.5rem' : (1.5 * (15 * 1 / props.len)) + 'rem'};
+color: black;
 `
 
 const NFTPreviewCard = (props) => {
@@ -40,12 +42,21 @@ const NFTPreviewCard = (props) => {
             <Row>
                 <Col xs={3}><Clipper><ResizedImage style={{ width: '10rem', imageRendering: "pixelated" }} src={myNFT.thumbnail} maxWidth={64} /> </Clipper></Col>
                 <Col xs={9}>
-                    <Container>
+                    <Container style={{ padding: '1rem' }}>
                         <Row>
                             <Col><NFTTitle len={myNFT.name.length}>{myNFT.name}</NFTTitle></Col>
                         </Row>
                         <Row>
-                            <Col>{myNFT.id} / ???</Col>
+                            <Col xs={9}>{myNFT.id} / ???</Col>
+                            <Col xs={2}>:L1</Col>
+                        </Row>
+                        <Row>
+
+                            <Col>HP<progress class="nes-progress is-error" value="10" max="100" style={{ height: '1rem', width: '18rem' }}></progress></Col>
+                        </Row>
+                        <Row>
+
+                            <Col style={{ fontSize: '0.7rem' }}>{myNFT.description.length > 120 ? myNFT.description.substring(0, 120) + "..." : myNFT.description}</Col>
                         </Row>
                     </Container>
 

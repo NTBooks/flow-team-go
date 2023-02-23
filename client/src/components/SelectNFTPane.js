@@ -128,11 +128,7 @@ const SelectNFTPane = (props) => {
                     <p style={{ textAlign: 'center', fontSize: '1rem', color: '#cc0000' }}>{selectedCollection}</p>
                     <SFXMenu setkey="nftsfx" mainMenuHandler={nftMenuHandler} selectableObjects={selectableNFTs} onCancel={() => { setSelectedCollection(null) }} />
                 </>
-
-                :
-
-
-                <SFXMenu setkey="colsfx" mainMenuHandler={collectionMenuHandler} selectableObjects={selectableCategories} />
+                : <SFXMenu setkey="colsfx" mainMenuHandler={collectionMenuHandler} selectableObjects={selectableCategories} onCancel={() => { props.pickNFTHandler(null) }} />
 
 
             }
