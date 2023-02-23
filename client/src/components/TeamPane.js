@@ -3,10 +3,12 @@ import styled from 'styled-components';
 import NFTPlacholderCard from './NFTPlaceholderCard';
 import SFXMenu from './SFXMenu';
 import SelectableWrapper from './SelectableWrapper';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Card from 'react-bootstrap/Card';
 import AnimatedText from 'react-animated-text-content';
 import SelectNFTPane from './SelectNFTPane';
+import { gameActions } from '../store/gamestate';
+import NFTPreviewCard from './NFTPreviewCard';
 
 
 const PixelContainer = styled.div`
@@ -30,9 +32,14 @@ const TeamPane = (props) => {
     const paneTeam1 = useSelector(state => props.letter === "A" ? state.gamestate.team_a[0] : state.gamestate.team_b[0]);
     const paneTeam2 = useSelector(state => props.letter === "A" ? state.gamestate.team_a[1] : state.gamestate.team_b[1]);
     const paneTeam3 = useSelector(state => props.letter === "A" ? state.gamestate.team_a[2] : state.gamestate.team_b[2]);
+
+    console.log("Pane1", paneTeam1);
+
     const galleryData = useSelector(state => state.gamestate.loadedGallery);
 
     const [paneMode, setPaneMode] = useState('List'); // Select
+    const [selectedSlot, setSelectedSlot] = useState(0); // Select
+    const dispatch = useDispatch();
 
     const funnyLoadingMessages = [
         "Just catching some unicorns to power up the server...",
@@ -90,6 +97,7 @@ const TeamPane = (props) => {
 
         console.log(cmd);
         setPaneMode('Select');
+        setSelectedSlot(cmd);
 
     };
 
@@ -99,6 +107,13 @@ const TeamPane = (props) => {
     useEffect(() => {
 
         const interval = setInterval(() => {
+            console.log("Interval: ", interval, galleryData);
+            if (galleryData !== null) {
+                console.log("Clear Interval");
+                clearInterval(interval);
+                return;
+            }
+
             setAniText(funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)]);
             // Create new animated text
 
@@ -119,40 +134,47 @@ const TeamPane = (props) => {
 
     }, []);
 
-    useEffect(() => {
-        if (aniText && aniTextInterval) {
-            clearInterval(aniTextInterval);
-            setAniTextInterval(null);
+    // useEffect(() => {
 
-        }
-    }, [aniText]);
+    //     console.log(aniText, aniTextInterval, galleryData !== null);
+
+    //     if (aniTextInterval && galleryData !== null) {
+
+    //         clearInterval(aniTextInterval);
+    //         setAniTextInterval(null);
+
+    //     }
+    // }, [aniText]);
 
 
 
 
+    const addToTeam = (e) => {
+        dispatch(gameActions.addToTeam({ team: props.letter, position: selectedSlot, collection: e.collection, nftid: e.id }));
 
+    }
 
     const selectableObjects = [
         {
             ctrl: <SelectableWrapper key={'Slot 1'}>
                 <PixelContainer>
-                    {!paneTeam1 && <NFTPlacholderCard />}
+                    {!paneTeam1 ? <NFTPlacholderCard /> : <NFTPreviewCard data={paneTeam1} />}
                 </PixelContainer>
-            </SelectableWrapper>, val: 'Slot 1'
+            </SelectableWrapper>, val: 0
         },
         {
             ctrl: <SelectableWrapper key={'Slot 2'}>
                 <PixelContainer>
-                    {!paneTeam2 && <NFTPlacholderCard />}
+                    {!paneTeam2 ? <NFTPlacholderCard /> : <NFTPreviewCard data={paneTeam2} />}
                 </PixelContainer>
-            </SelectableWrapper>, val: 'Slot 2'
+            </SelectableWrapper>, val: 1
         },
         {
             ctrl: <SelectableWrapper key={'Slot 3'}>
                 <PixelContainer>
-                    {!paneTeam3 && <NFTPlacholderCard />}
+                    {!paneTeam3 ? <NFTPlacholderCard /> : <NFTPreviewCard data={paneTeam3} />}
                 </PixelContainer>
-            </SelectableWrapper>, val: 'Slot 3'
+            </SelectableWrapper>, val: 2
         }
     ];
 
@@ -160,7 +182,7 @@ const TeamPane = (props) => {
         <h1>Team {`${props.letter}`}</h1>
         {galleryData === null ?
             (aniText ?
-                <div className={'nes-container with-title'} style={{ margin: '3rem' }}>
+                <div className={'nes-container with-title'} style={{ margin: '3rem', textAlign: 'center' }}>
                     <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>Loading</h3>
                     <AnimatedText
                         type="chars" // animate words or chars
@@ -187,7 +209,7 @@ const TeamPane = (props) => {
 
 
 
-    </> : <SelectNFTPane />;
+    </> : <SelectNFTPane pickNFTHandler={(e) => { console.log(e); if (e !== null) addToTeam(e); setPaneMode('List'); }} />;
 }
 
 export default TeamPane;

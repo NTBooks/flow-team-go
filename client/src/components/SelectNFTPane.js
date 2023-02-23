@@ -6,6 +6,7 @@ import SFXMenu from './SFXMenu';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import ResizedImage from './ResizedImage';
 
 const ScrollContainer = styled.div`
 overflow-y: scroll;
@@ -17,7 +18,7 @@ margin-left:-1rem;
 
 `;
 
-const SelectNFTPane = () => {
+const SelectNFTPane = (props) => {
 
     // Mode switches between selecting a collection then selecting an NFT
     // User needs to be able to go back from the NFT mode to select a different collection
@@ -38,9 +39,9 @@ const SelectNFTPane = () => {
             if (value.length > 0) {
                 selectableCategories.push({
                     ctrl: <SelectableWrapper key={'wrapper' + key}>
-                        <Container style={{ width: '30rem', textAlign: 'left', marginTop: '1rem', borderBottom: '0.2rem solid #cccccc' }}>
+                        <Container style={{ width: '30rem', textAlign: 'left', margin: '0.5rem 0 0 0', paddingBottom: '0.5rem', borderBottom: '0.2rem solid #cccccc', minHeight: '2rem' }}>
                             <Row>
-                                <Col xs={1}><img src={value[0].collectionSquareImage} style={{ width: '2rem' }} /></Col>
+                                <Col xs={1} style={{ minHeight: '2rem' }}><ResizedImage src={value[0].collectionSquareImage} style={{ width: '2rem', imageRendering: "pixelated" }} maxWidth={32} /></Col>
                                 <Col xs={11}>{value[0].collectionName}</Col>
                             </Row>
                         </Container>
@@ -51,6 +52,19 @@ const SelectNFTPane = () => {
             }
         }
 
+        selectableCategories = [{
+            ctrl: <SelectableWrapper key={'backbutton0'}>
+                <Container style={{ width: '30rem', textAlign: 'left', margin: '0.5rem 0 0 0', paddingBottom: '0.5rem', borderBottom: '0.2rem solid #cccccc', minHeight: '4rem' }}>
+                    <Row>
+                        <Col xs={1}>&lt;</Col>
+                        <Col xs={11}>Return to Team</Col>
+                    </Row>
+                </Container>
+
+
+            </SelectableWrapper>, val: 'BACK'
+        }, ...selectableCategories];
+
     }
 
     if (selectedCollection) {
@@ -59,10 +73,10 @@ const SelectNFTPane = () => {
 
             return {
                 ctrl: <SelectableWrapper key={'wrapper' + x.id}>
-                    <Container style={{ width: '30rem', textAlign: 'left', marginTop: '1rem', borderBottom: '0.2rem solid #cccccc' }}>
+                    <Container style={{ width: '30rem', textAlign: 'left', margin: '0.5rem 0 0 0', paddingBottom: '0.5rem', borderBottom: '0.2rem solid #cccccc' }}>
                         <Row>
-                            <Col xs={1}><img src={x.thumbnail} style={{ width: '2rem' }} /></Col>
-                            <Col xs={11}>{x.name}</Col>
+                            <Col xs={2}><ResizedImage src={x.thumbnail} style={{ width: '4rem', imageRendering: "pixelated" }} maxWidth={32} /></Col>
+                            <Col xs={10}>{x.name}</Col>
                         </Row>
                     </Container>
 
@@ -74,7 +88,7 @@ const SelectNFTPane = () => {
 
         selectableNFTs = [{
             ctrl: <SelectableWrapper key={'backbutton'}>
-                <Container style={{ width: '30rem', textAlign: 'left', marginTop: '1rem', borderBottom: '0.2rem solid #cccccc' }}>
+                <Container style={{ width: '30rem', textAlign: 'left', margin: '0.5rem 0 0 0', paddingBottom: '0.5rem', borderBottom: '0.2rem solid #cccccc' }}>
                     <Row>
                         <Col xs={1}>&lt;</Col>
                         <Col xs={11}>Return to Collections</Col>
@@ -90,6 +104,8 @@ const SelectNFTPane = () => {
 
     const collectionMenuHandler = (cmd) => {
 
+        if (cmd === "BACK") props.pickNFTHandler(null);
+
         setSelectedCollection(cmd);
 
     };
@@ -97,6 +113,8 @@ const SelectNFTPane = () => {
     const nftMenuHandler = (cmd) => {
 
         if (cmd === "BACK") setSelectedCollection(null);
+
+        props.pickNFTHandler({ collection: selectedCollection, id: cmd })
 
     };
 
@@ -106,12 +124,12 @@ const SelectNFTPane = () => {
         <h3 className='title' style={{ fontSize: '2rem', marginTop: '-1.3rem', marginLeft: '1rem' }}>Select NFT</h3>
         <ScrollContainer>
             {selectedCollection ?
-
-                <SFXMenu setkey="nftsfx" mainMenuHandler={nftMenuHandler} selectableObjects={selectableNFTs} onCancel={() => { setSelectedCollection(null) }} />
-
+                <>
+                    <p style={{ textAlign: 'center', fontSize: '1rem', color: '#cc0000' }}>{selectedCollection}</p>
+                    <SFXMenu setkey="nftsfx" mainMenuHandler={nftMenuHandler} selectableObjects={selectableNFTs} onCancel={() => { setSelectedCollection(null) }} />
+                </>
 
                 :
-
 
 
                 <SFXMenu setkey="colsfx" mainMenuHandler={collectionMenuHandler} selectableObjects={selectableCategories} />

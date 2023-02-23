@@ -272,7 +272,7 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
         // Delete old cache data
         try {
             if (fs.existsSync(cacheFile)) {
-                if ((new Date()) - fs.statSync(cacheFile).mtime > 60 * 1000 * 5)
+                if ((new Date()) - fs.statSync(cacheFile).mtime > 60 * 1000 * 60)
                     fs.unlinkSync(cacheFile);
             }
         } catch {
@@ -364,7 +364,7 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
                         } catch {
                             console.log("Failed to delete cache file.");
                         }
-                    }, 60 * 1000 * 5);
+                    }, 60 * 1000 * 60);
                 });
 
 

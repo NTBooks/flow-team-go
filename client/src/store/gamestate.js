@@ -2,8 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialGameState = {
     userWallet: "",
-    team_a: [],
-    team_b: [],
+    team_a: [null, null, null],
+    team_b: [null, null, null],
     bgm_toggle: false,
     sfx_toggle: false,
     currentBG: '',
@@ -38,6 +38,18 @@ const gameSlice = createSlice({
         },
         addToTeam(state, action) {
             // TODO: write add to team logic
+            // Needs Team (A or B)
+            // Needs slot (0-2)
+
+            const arg = { collection: action.payload.collection, id: action.payload.nftid };
+
+            if (action.payload.team === 'A') {
+                state.team_a[+action.payload.position] = arg;
+            }
+
+            if (action.payload.team === 'B') {
+                state.team_b[+action.payload.position] = arg;
+            }
         },
         removeFromTeam(state, action) {
             // TODO: write remove from team logic
