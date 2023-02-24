@@ -11,6 +11,7 @@ import AudioPlayer from "./AudioPlayer";
 import AboutPane from "./AboutPane";
 import styled from "styled-components";
 import GalleryLoader from "./GalleryLoader";
+import BattleMode from "./BattleMode";
 
 const router = createBrowserRouter([
     {
@@ -35,7 +36,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/versus",
-        element: <><GameScreen>Versus</GameScreen></>,
+        element: <><GameScreen><BattleMode /></GameScreen></>,
     },
     {
         path: "/options",

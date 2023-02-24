@@ -15,8 +15,8 @@ height: 10rem;
 top: 10%;
 margin-left: 10%;
 opacity: 0.8;
-filter:blur(0.2rem);
-mix-blend-mode: plus-lighter;
+position: absolute;
+
 background-image: url(${require('../../public/ControllerCross.svg')});
 `
 
@@ -27,8 +27,7 @@ top: 50%;
 left: 60%;
 opacity: 0.8;
 position: absolute;
-filter:blur(0.2rem);
-mix-blend-mode: plus-lighter;
+
 background-image: url(${require('../../public/CircleButton.svg')});
 `
 
@@ -39,8 +38,7 @@ top: 20%;
 left: 80%;
 opacity: 0.8;
 position: absolute;
-filter:blur(0.2rem);
-mix-blend-mode: plus-lighter;
+
 background-image: url(${require('../../public/CircleButton.svg')});
 `
 

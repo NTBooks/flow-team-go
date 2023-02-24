@@ -138,4 +138,4 @@ const SelectNFTPane = (props) => {
 
 }
 
-export default SelectNFTPane;
+export default React.memo(SelectNFTPane);

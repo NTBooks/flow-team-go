@@ -1,5 +1,5 @@
 
-import react, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useKeyPress from "../hooks/useKeyPress";
 import NESTabs from "./NESTabs";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -111,4 +111,4 @@ const GameScreen = (props) => {
 
 }
 
-export default GameScreen;
+export default React.memo(GameScreen);

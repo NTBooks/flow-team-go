@@ -120,7 +120,8 @@ const Intro = (props) => {
             //console.log(fresjson);
             if (fresjson?.name === newGallery) {
                 // it worked
-                dispatch(gameActions.setUserWallet({ address: e.target[0].value, gallery: newGallery.split(",")[0], galleryName: newGallery.split(",")[1], jwt: `BEARER ${fresjson?.token}` }));
+                dispatch(gameActions.setUserWallet({ address: e.target[0].value, gallery: newGallery.split(",")[0], galleryName: newGallery.split(",")[1] }));
+                dispatch(gameActions.setJwt({ jwt: `BEARER ${fresjson?.token}`, tempPin: true }));
                 localStorage.setItem("gogallery", newGallery);
                 navigate(`/${newGallery.split(",")[0]}/a_team/`);
                 dispatch(gameActions.disableKeylisteners({ set: false }));
@@ -185,7 +186,9 @@ const Intro = (props) => {
 
                         if (fresjson?.token) {
 
-                            dispatch(gameActions.setJwt({ jwt: `BEARER ${fresjson?.token}` }));
+                            console.log("SETTTTT")
+
+                            dispatch(gameActions.setJwt({ jwt: `BEARER ${fresjson?.token}`, tempPin: true }));
                             localStorage.setItem("token_" + lastCreatedAddress, fresjson?.token);
 
                         }

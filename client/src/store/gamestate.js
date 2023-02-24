@@ -12,7 +12,9 @@ const initialGameState = {
     galleryName: '',
     gallery: '',
     disableKeylisteners: false,
-    loadedGallery: null
+    loadedGallery: null,
+    nftStats: [],
+    tempPin: false
 
 };
 
@@ -49,6 +51,9 @@ const gameSlice = createSlice({
         disableKeylisteners(state, action) {
             state.disableKeylisteners = action.payload.set;
         },
+        addNFTStats(state, action) {
+            state.nftStats = [...state.nftStats, action.payload.nftdata];
+        },
         addToTeam(state, action) {
             // TODO: write add to team logic
             // Needs Team (A or B)
@@ -81,7 +86,13 @@ const gameSlice = createSlice({
             state.network = action.payload.network;
         },
         setJwt(state, action) {
-            state.jwt = action.payload.jwt;
+            if (action.payload.jwt) {
+                state.jwt = action.payload.jwt;
+            }
+
+            if (action.payload.tempPin !== undefined) {
+                state.tempPin = action.payload.tempPin;
+            }
         }
 
 

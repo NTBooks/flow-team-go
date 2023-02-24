@@ -4,12 +4,12 @@ import useAudio from '../hooks/useAudio';
 import useKeyPress from '../hooks/useKeyPress';
 import styled from 'styled-components';
 
-const FlexItem = styled.div`
+const FlexItem = React.memo(styled.div`
 
   width: 100%;
   min-height: 2rem;
   text-align: center;
-`
+`);
 
 const SFXMenu = (props) => {
 
@@ -78,9 +78,9 @@ const SFXMenu = (props) => {
 
         const onCl = (e) => { console.log(i); setSelectedIndex(+i) };
         if (selectedIndex == i)
-            return <FlexItem style={selectableObjects[i].ctrl.props.style} key={(props.setkey ? props.setkey : 'flex') + i} id={'flex' + i}><div>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, isSelected: true, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</div></FlexItem>;
+            return <FlexItem style={selectableObjects[i].ctrl.props.style} key={(props.setkey ? props.setkey : 'flex') + i} id={'flex' + i}>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, isSelected: true, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</FlexItem>;
 
-        return <FlexItem style={selectableObjects[i].ctrl.props.style} key={(props.setkey ? props.setkey : 'flex') + i} id={'flex' + i}><div>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</div></FlexItem>;
+        return <FlexItem style={selectableObjects[i].ctrl.props.style} key={(props.setkey ? props.setkey : 'flex') + i} id={'flex' + i}>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</FlexItem>;
 
     });
 
@@ -91,4 +91,4 @@ const SFXMenu = (props) => {
 
 }
 
-export default SFXMenu;
+export default React.memo(SFXMenu);

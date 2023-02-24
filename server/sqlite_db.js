@@ -198,7 +198,41 @@ module.exports = {
         } catch (dbError) {
             console.error(dbError);
         }
-    }
+    },
+
+    getTrackedNFT: async (collection, nftid, chain) => {
+        try {
+
+            const option = await db.all(
+                `SELECT collection, nftid, chain, health, level, content FROM NFTStats  WHERE collection = ? AND nftid = ? AND chain = ? LIMIT 1`
+
+                , [collection, nftid, chain]
+            );
+
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+
+    addTrackedNFT: async (collection, nftid, content, chain) => {
+        try {
+
+            const option = await db.all(
+                `INSERT INTO NFTStats (collection, nftid, chain, health, level, content) 
+                SELECT ?, ?, ?, 100, 1, ?
+                WHERE NOT EXISTS(SELECT 1 FROM NFTStats WHERE collection = ? AND nftid = ? AND chain = ?)`
+
+                , [collection, nftid, chain, content, collection, nftid, chain]
+            );
+
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
 
 
 };

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import ResizedImage from './ResizedImage';
 import styled from 'styled-components';
+import ProgressBar from 'react-bootstrap/ProgressBar';
+import { gameActions } from '../store/gamestate';
 
 const Clipper = styled.div`
 width: 10rem;
@@ -35,12 +37,47 @@ const NFTPreviewCard = (props) => {
 
     const myNFT = useSelector(state => state.gamestate.loadedGallery.nfts[props.data.collection]?.find(x => x.id == props.data.id));
 
+    //const [trackedNFTData, setTrackedNFTData] = useState();
+
+    const trackedNFTData = useSelector(state => state.gamestate.nftStats.find(x => x.collection === props.data.collection && x.nftid == props.data.id));
+
     console.log(myNFT, props.data);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+
+        if (!trackedNFTData) {
+            (async () => {
+                const TrackedNFTRequest = await fetch(`/v1/nft/${props.data.collection}/${props.data.id}`);
+                const TrackedNFTRequestData = await TrackedNFTRequest.json();
+                if (TrackedNFTRequestData.nftdata) {
+
+                    dispatch(gameActions.addNFTStats({ nftdata: TrackedNFTRequestData.nftdata }))
+
+                } else {
+                    // Doesn't exist, so stub it in so it won't repeat the request
+                    dispatch(gameActions.addNFTStats({ nftdata: { nftid: props.data.id, health: 100, level: -1, collection: props.data.collection } }))
+                }
+
+
+            })();
+
+            console.log("LOAD EFFECT");
+        }
+
+    }, []);
+
+    console.log("DRAW NFTPREVIEW");
 
     return !props.data || !myNFT ? <NFTTitle>Not Loaded. </NFTTitle> :
         <NFTBezel>        <Container>
             <Row>
-                <Col xs={3}><Clipper><ResizedImage style={{ width: '10rem', imageRendering: "pixelated" }} src={myNFT.thumbnail} maxWidth={64} /> </Clipper></Col>
+                <Col xs={3}>
+                    <Clipper>
+                        <ResizedImage style={{ width: '10rem', imageRendering: "pixelated" }} src={myNFT.thumbnail} maxWidth={64} />
+                    </Clipper>
+                </Col>
                 <Col xs={9}>
                     <Container style={{ padding: '1rem' }}>
                         <Row>
@@ -48,11 +85,11 @@ const NFTPreviewCard = (props) => {
                         </Row>
                         <Row>
                             <Col xs={9}>{myNFT.id} / ???</Col>
-                            <Col xs={2}>:L1</Col>
+                            <Col xs={2}>{trackedNFTData ? (trackedNFTData.level > 0 ? `:L${trackedNFTData.level}` : ':NEW!') : `:L0`}</Col>
                         </Row>
                         <Row>
 
-                            <Col>HP<progress className="nes-progress is-error" value="10" max="100" style={{ height: '1rem', width: '18rem' }}></progress></Col>
+                            <Col>HP<div style={{ height: '1rem', width: '17rem', border: '0.2rem solid black', marginLeft: '0.5rem', display: 'inline-block', top: '-0.3rem', position: 'relative' }}><ProgressBar variant="danger" now={trackedNFTData ? trackedNFTData.health : 100} max="100"></ProgressBar></div></Col>
                         </Row>
                         <Row>
 
@@ -70,4 +107,4 @@ const NFTPreviewCard = (props) => {
 
 }
 
-export default NFTPreviewCard;
+export default React.memo(NFTPreviewCard);

@@ -10,6 +10,8 @@ import useAudio from '../hooks/useAudio';
 import AudioPlayer from './AudioPlayer';
 import { useNavigate, useLocation } from "react-router-dom";
 import SFXMenu from './SFXMenu';
+import RegisterModal from './RegisterModal';
+import LoginModal from './LoginModal';
 
 const OptionsLabel = styled.span`
 font-size: 1.5rem;
@@ -28,6 +30,10 @@ const OptionsPane = (props) => {
 
     const BGMState = useSelector(state => state.gamestate.bgm_toggle);
     const SFXState = useSelector(state => state.gamestate.sfx_toggle);
+    const JWT = useSelector(state => state.gamestate.jwt);
+
+    const [showRegister, setShowRegister] = useState();
+    const [showLogin, setShowLogin] = useState();
 
 
     const huzuh = useAudio([require('url:../../public/sfx/Select.wav')], false)[2];
@@ -35,6 +41,7 @@ const OptionsPane = (props) => {
 
     const navigate = useNavigate();
 
+    console.log("DRAW OPTIONS");
 
 
 
@@ -54,6 +61,16 @@ const OptionsPane = (props) => {
                 return;
             case 'Set Pin':
                 // TODO: Implement this
+
+                dispatch(gameActions.disableKeylisteners({ set: true }));
+                setShowRegister(true);
+
+                return;
+            case 'Login':
+                // TODO: Implement this
+                dispatch(gameActions.disableKeylisteners({ set: true }));
+                setShowLogin(true);
+
                 return;
         }
     };
@@ -83,10 +100,24 @@ const OptionsPane = (props) => {
                     </Row>
                 </Container></SelectableWrapper>, val: 'SFX'
         },
-        { ctrl: <SelectableWrapper key={'new'}> <OptionsLabel> New Team </OptionsLabel>  </SelectableWrapper>, val: 'New Team' },
-        { ctrl: <SelectableWrapper key={'pin'}> <OptionsLabel> Set PIN </OptionsLabel>  </SelectableWrapper>, val: 'Set Pin' }
+        { ctrl: <SelectableWrapper key={'new'} style={{ paddingTop: '1rem' }}> <OptionsLabel> New Team </OptionsLabel>  </SelectableWrapper>, val: 'New Team' }
+
 
     ];
+
+    if (JWT) {
+        selectableObjects2.push({
+            ctrl: <SelectableWrapper key={'pin'} style={{ paddingTop: '1rem', color: "#0000cc" }}> <OptionsLabel> Set PIN </OptionsLabel>
+
+            </SelectableWrapper>, val: 'Set Pin'
+        })
+    } else {
+        selectableObjects2.push({
+            ctrl: <SelectableWrapper key={'login'} style={{ paddingTop: '1rem', color: "#cc0000" }}> <OptionsLabel> Login with PIN </OptionsLabel>
+
+            </SelectableWrapper>, val: 'Login'
+        })
+    }
 
 
 
@@ -127,9 +158,9 @@ const OptionsPane = (props) => {
             {selectableObjects[2]}
             {selectableObjects[3]}
         </div> */}
-
-
+        <RegisterModal show={showRegister} onClose={() => { setShowRegister(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
+        <LoginModal show={showLogin} onClose={() => { setShowLogin(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
     </>;
 }
 
-export default OptionsPane;
+export default React.memo(OptionsPane);

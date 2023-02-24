@@ -38,4 +38,4 @@ const SelectableWrapper = (props) => {
 
 }
 
-export default SelectableWrapper;
+export default React.memo(SelectableWrapper);

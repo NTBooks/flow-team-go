@@ -36,4 +36,4 @@ const GatewayImage = (props) => {
 
 }
 
-export default GatewayImage;
+export default React.memo(GatewayImage);

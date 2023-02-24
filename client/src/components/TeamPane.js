@@ -11,7 +11,7 @@ import { gameActions } from '../store/gamestate';
 import NFTPreviewCard from './NFTPreviewCard';
 
 
-const PixelContainer = styled.div`
+const PixelContainer = React.memo(styled.div`
 background-image: URL('${require('../../public/PixelFrame.png')}');
 image-rendering: pixelated;
 background-size: contain;
@@ -20,11 +20,8 @@ background-size: contain;
   background-repeat: no-repeat;
 margin: 0.1rem auto 0.1rem auto;
 opacity: 0.8;
-`
+`);
 
-const LoadingMessageContainer = styled.div`
-
-`
 
 
 const TeamPane = (props) => {
@@ -184,21 +181,21 @@ const TeamPane = (props) => {
 
     const selectableObjects = [
         {
-            ctrl: <SelectableWrapper key={'Slot 1'}>
+            ctrl: <SelectableWrapper>
                 <PixelContainer>
                     {!paneTeam1 ? <NFTPlacholderCard /> : <NFTPreviewCard data={paneTeam1} />}
                 </PixelContainer>
             </SelectableWrapper>, val: 0
         },
         {
-            ctrl: <SelectableWrapper key={'Slot 2'}>
+            ctrl: <SelectableWrapper>
                 <PixelContainer>
                     {!paneTeam2 ? <NFTPlacholderCard /> : <NFTPreviewCard data={paneTeam2} />}
                 </PixelContainer>
             </SelectableWrapper>, val: 1
         },
         {
-            ctrl: <SelectableWrapper key={'Slot 3'}>
+            ctrl: <SelectableWrapper>
                 <PixelContainer>
                     {!paneTeam3 ? <NFTPlacholderCard /> : <NFTPreviewCard data={paneTeam3} />}
                 </PixelContainer>
@@ -211,7 +208,7 @@ const TeamPane = (props) => {
         {galleryData === null ?
             (aniText ?
                 <div className={'nes-container with-title'} style={{ margin: '3rem', textAlign: 'center' }}>
-                    <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>Loading Wallet...</h3>
+                    <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>Loading NFTs</h3>
                     <AnimatedText
                         type="chars" // animate words or chars
                         animation={{
@@ -232,7 +229,7 @@ const TeamPane = (props) => {
                         {aniText}
                     </AnimatedText>
                 </div> : <div style={{ textAlign: "center" }}>Checking cache...</div>) :
-            <SFXMenu setkey="teamsfx" selectableObjects={selectableObjects} mainMenuHandler={menuHandler} />}
+            <SFXMenu setkey={`teamsfx${props.letter}`} selectableObjects={selectableObjects} mainMenuHandler={menuHandler} />}
 
 
 
@@ -240,4 +237,4 @@ const TeamPane = (props) => {
     </> : <SelectNFTPane pickNFTHandler={(e) => { console.log(e); if (e !== null) addToTeam(e); setPaneMode('List'); }} />;
 }
 
-export default TeamPane;
+export default React.memo(TeamPane);

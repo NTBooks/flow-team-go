@@ -98,7 +98,7 @@ app.post("/v1/create", authenticateToken, async (req, res) => {
     try {
         // User wishes to set a pin
         const userName = req.bodyString("name");
-        const userWallet = req.bodyString("wallet");
+        const userWallet = req.bodyString("wallet").toLowerCase();
         const tempPin = req.bodyString("pin");
 
         if (!verifyPropertyName(userName)) {
@@ -110,7 +110,7 @@ app.post("/v1/create", authenticateToken, async (req, res) => {
         }
 
 
-        if (/^0x[0-9a-fA-F]{16}$/.test(userWallet) || /.+\.find$/.test(userWallet.toLowerCase())) {
+        if (/^0x[0-9a-fA-F]{16}$/.test(userWallet) || /.+\.find$/.test(userWallet)) {
 
 
 
@@ -263,11 +263,130 @@ app.post("/v1/updateteam", authenticateToken, async (req, res) => {
 
 });
 
+var catalogSizeCache = null;
+
+async function cacheCollectionCt() {
+
+
+    if (!catalogSizeCache) {
+        catalogSizeCache = await fcl.query({
+            cadence: fs.readFileSync("cadence/get_nft_catalog_count.cdc", "utf-8")
+        });
+    }
+    return catalogSizeCache;
+}
 
 async function asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
         await callback(array[index], index, array);
     }
+}
+
+async function walletCache(alias, catalogSize, wallet) {
+    let NFTList = {};
+    let cache_served = false;
+    const cacheFile = `.tmp/${alias}.zip`;
+
+    // Delete old cache data
+    try {
+        if (fs.existsSync(cacheFile)) {
+            if ((new Date()) - fs.statSync(cacheFile).mtime > 60 * 1000 * 60)
+                fs.unlinkSync(cacheFile);
+        }
+    } catch {
+        console.log("Failed to delete cache file.");
+    }
+
+    const zip = new JSZip();
+    // check for a cache file and return it if so
+    if (fs.existsSync(cacheFile)) {
+        const fdata = await fs.promises.readFile(cacheFile);
+
+        const fileData = await JSZip.loadAsync(fdata);
+        const unzippedFileData = await fileData.files["nfts.txt"].async('string');
+        //console.log(fileData) // These are your file contents   
+        NFTList = JSON.parse(unzippedFileData);
+        cache_served = true;
+
+        // TODO: Check file data
+        // For now, delete the file after 5 mins just in case it's old. Cron would be better for cleaning this dir but it's overkill
+
+        // console.log("Cache queued for deletion.", new Date());
+        // setTimeout(() => {
+        //     try {
+        //         console.log("Attempt unlink.", new Date());
+        //         // delete the file after 5 mins
+        //         if (fs.existsSync(cacheFile)) {
+
+        //             fs.unlinkSync(cacheFile);
+        //         }
+        //     } catch {
+        //         console.log("Failed to delete cache file.");
+        //     }
+        // }, 60 * 1000 * 5);
+
+
+    }
+    else {
+        const catalogCount = +catalogSize;
+        const PAGESIZE = 15;
+        const PAGES = (catalogCount / PAGESIZE) + 1;
+
+        const NFTWallets = wallet.map(x => x.address);
+
+
+
+        await asyncForEach(NFTWallets, async linkedwallet => {
+            for (var i = 0; i < PAGES; i++) {
+                const response = await fcl.query({
+                    cadence: fs.readFileSync("cadence/get_all_nfts_in_account.cdc", "utf-8"),
+                    args: (arg, t) => [
+                        arg(linkedwallet, t.Address),
+                        arg(`${PAGESIZE}`, t.Int),
+                        arg(`${i}`, t.Int)
+                    ],
+                });
+                for (let [key, value] of Object.entries(response)) {
+                    if (NFTList[key] === undefined && value && value.length > 0) {
+                        NFTList[key] = [];
+                    }
+                    if (value && value.length > 0) {
+                        NFTList[key] = [...NFTList[key], ...value];
+                    }
+                }
+                //console.log(response);
+            }
+        });
+
+
+
+
+        zip.file("nfts.txt", JSON.stringify(NFTList));
+
+        zip
+            .generateNodeStream({ type: 'nodebuffer', streamFiles: true, compression: "DEFLATE" })
+            .pipe(fs.createWriteStream(cacheFile))
+            .on('finish', function () {
+                // JSZip generates a readable stream with a "end" event,
+                // but is piped here in a writable stream which emits a "finish" event.
+                console.log(cacheFile + " written.");
+
+                setTimeout(() => {
+                    try {
+                        // delete the file after 5 mins
+                        if (fs.existsSync(cacheFile))
+                            fs.unlinkSync(cacheFile);
+                    } catch {
+                        console.log("Failed to delete cache file.");
+                    }
+                }, 60 * 1000 * 60);
+            });
+
+
+
+    }
+
+    return { cache_served, NFTList };
 }
 
 app.get("/v1/getgallery/:gallery", async (req, res) => {
@@ -292,118 +411,11 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
 
         const wallet_addr = wallet[0].address;
 
-        const catalogSize = await fcl.query({
-            cadence: fs.readFileSync("cadence/get_nft_catalog_count.cdc", "utf-8")
-        });
+        const catalogSize = await cacheCollectionCt();
 
+        const dataLoad = await walletCache(wallet[0].alias, catalogSize, wallet);
+        const NFTList = dataLoad.NFTList;
 
-        let NFTList = {};
-        let cache_served = false;
-        const cacheFile = `.tmp/${wallet[0].alias}.zip`;
-
-        // Delete old cache data
-        try {
-            if (fs.existsSync(cacheFile)) {
-                if ((new Date()) - fs.statSync(cacheFile).mtime > 60 * 1000 * 60)
-                    fs.unlinkSync(cacheFile);
-            }
-        } catch {
-            console.log("Failed to delete cache file.");
-        }
-
-        const zip = new JSZip();
-        // check for a cache file and return it if so
-        if (fs.existsSync(cacheFile)) {
-            const fdata = await fs.promises.readFile(cacheFile);
-
-            const fileData = await JSZip.loadAsync(fdata);
-            const unzippedFileData = await fileData.files["nfts.txt"].async('string');
-            //console.log(fileData) // These are your file contents   
-            NFTList = JSON.parse(unzippedFileData);
-            cache_served = true;
-
-            // TODO: Check file data
-            // For now, delete the file after 5 mins just in case it's old. Cron would be better for cleaning this dir but it's overkill
-
-            // console.log("Cache queued for deletion.", new Date());
-            // setTimeout(() => {
-            //     try {
-            //         console.log("Attempt unlink.", new Date());
-            //         // delete the file after 5 mins
-            //         if (fs.existsSync(cacheFile)) {
-
-            //             fs.unlinkSync(cacheFile);
-            //         }
-            //     } catch {
-            //         console.log("Failed to delete cache file.");
-            //     }
-            // }, 60 * 1000 * 5);
-
-
-        }
-        else {
-            const catalogCount = +catalogSize;
-            const PAGESIZE = 15;
-            const PAGES = (catalogCount / PAGESIZE) + 1;
-
-            const NFTWallets = wallet.map(x => x.address);
-
-
-
-            await asyncForEach(NFTWallets, async linkedwallet => {
-                for (var i = 0; i < PAGES; i++) {
-                    const response = await fcl.query({
-                        cadence: fs.readFileSync("cadence/get_all_nfts_in_account.cdc", "utf-8"),
-                        args: (arg, t) => [
-                            arg(linkedwallet, t.Address),
-                            arg(`${PAGESIZE}`, t.Int),
-                            arg(`${i}`, t.Int)
-                        ],
-                    });
-                    for (let [key, value] of Object.entries(response)) {
-                        if (NFTList[key] === undefined && value && value.length > 0) {
-                            NFTList[key] = [];
-                        }
-                        if (value && value.length > 0) {
-                            NFTList[key] = [...NFTList[key], ...value];
-                        }
-                    }
-                    //console.log(response);
-                }
-            });
-
-
-
-
-            zip.file("nfts.txt", JSON.stringify(NFTList));
-
-            zip
-                .generateNodeStream({ type: 'nodebuffer', streamFiles: true, compression: "DEFLATE" })
-                .pipe(fs.createWriteStream(cacheFile))
-                .on('finish', function () {
-                    // JSZip generates a readable stream with a "end" event,
-                    // but is piped here in a writable stream which emits a "finish" event.
-                    console.log(cacheFile + " written.");
-
-                    setTimeout(() => {
-                        try {
-                            // delete the file after 5 mins
-                            if (fs.existsSync(cacheFile))
-                                fs.unlinkSync(cacheFile);
-                        } catch {
-                            console.log("Failed to delete cache file.");
-                        }
-                    }, 60 * 1000 * 60);
-                });
-
-
-
-        }
-
-        //gallery_status: await db.getTeamStatus(gallery)
-
-        // Generate relevent NFT data only and save to the DB
-        // state.gamestate.loadedGallery.nfts[props.data.collection]?.find(x => x.id == props.data.id)
         const relevantTeamNFTs = teamData.length > 0 ? JSON.parse(teamData[0].team).filter(x => x !== null).map(teammember => {
 
             return NFTList[teammember.collection]?.find(x => x.id == teammember.id)
@@ -411,7 +423,7 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
 
         console.log(relevantTeamNFTs);
 
-        res.send({ gallery: gallery, catalogSize: catalogSize, owner: wallet_addr, nfts: NFTList, teams: teamData.length > 0 ? teamData[0].team : null, cache_served });
+        res.send({ gallery: gallery, catalogSize: catalogSize, owner: wallet_addr, nfts: NFTList, teams: teamData.length > 0 ? teamData[0].team : null, cache_served: dataLoad.cache_served });
 
     } catch (ex) {
         res.statusCode = 403;
@@ -420,154 +432,77 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
     }
 });
 
-// app.get("/v1/bakegallery/:gallery", authenticateToken, async (req, res) => {
-//     try {
-
-
-//         const gallery = req.paramString("gallery");
-
-
-//         // TODO: Get user customizations too
-
-//         // get user's NFTs
-//         const wallet = await db.getWallet(gallery);
-//         if (wallet.length <= 0) {
-//             throw { message: "Gallery does not exist." };
-//         }
-//         const teamData = await db.getTeamStatus(gallery);
-//         const wallet_addr = wallet[0].address;
-
-//         const resolve = 'import FIND from 0x097bafa4e0b48eef\npub fun main(name:String) : Address?{\nreturn FIND.resolve(name)\n}'
-
-//         const status = wallet_addr.indexOf('.find') > 0 ? await fcl.query({
-//             cadence: find.networks.mainnet.scripts.getStatus.code,
-//             args: (arg, t) => [
-//                 arg(wallet_addr, t.String),
-
-//             ],
-//         }) : null;
-//         let NFTList = {};
-//         let cache_served = false;
-//         const cacheFile = `.tmp/${wallet_addr}.zip`;
-
-//         // Delete old cache data
-//         try {
-//             if (fs.existsSync(cacheFile)) {
-//                 if ((new Date()) - fs.statSync(cacheFile).mtime > 60 * 1000 * 60)
-//                     fs.unlinkSync(cacheFile);
-//             }
-//         } catch {
-//             console.log("Failed to delete cache file.");
-//         }
-
-//         const zip = new JSZip();
-//         // check for a cache file and return it if so
-//         if (fs.existsSync(cacheFile)) {
-//             const fdata = await fs.promises.readFile(cacheFile);
-
-//             const fileData = await JSZip.loadAsync(fdata);
-//             const unzippedFileData = await fileData.files["nfts.txt"].async('string');
-//             //console.log(fileData) // These are your file contents   
-//             NFTList = JSON.parse(unzippedFileData);
-//             cache_served = true;
-
-//             // TODO: Check file data
-//             // For now, delete the file after 5 mins just in case it's old. Cron would be better for cleaning this dir but it's overkill
-
-//             // console.log("Cache queued for deletion.", new Date());
-//             // setTimeout(() => {
-//             //     try {
-//             //         console.log("Attempt unlink.", new Date());
-//             //         // delete the file after 5 mins
-//             //         if (fs.existsSync(cacheFile)) {
-
-//             //             fs.unlinkSync(cacheFile);
-//             //         }
-//             //     } catch {
-//             //         console.log("Failed to delete cache file.");
-//             //     }
-//             // }, 60 * 1000 * 5);
-
-
-//         }
-//         else {
-//             const catalogCount = +catalogSize;
-//             const PAGESIZE = 15;
-//             const PAGES = (catalogCount / PAGESIZE) + 1;
-
-//             const NFTWallets = status ? status.FINDReport.accounts.map(x => x.address) : [wallet_addr];
 
 
 
-//             await asyncForEach(NFTWallets, async linkedwallet => {
-//                 for (var i = 0; i < PAGES; i++) {
-//                     const response = await fcl.query({
-//                         cadence: fs.readFileSync("cadence/get_all_nfts_in_account.cdc", "utf-8"),
-//                         args: (arg, t) => [
-//                             arg(linkedwallet, t.Address),
-//                             arg(`${PAGESIZE}`, t.Int),
-//                             arg(`${i}`, t.Int)
-//                         ],
-//                     });
-//                     for (let [key, value] of Object.entries(response)) {
-//                         if (NFTList[key] === undefined && value && value.length > 0) {
-//                             NFTList[key] = [];
-//                         }
-//                         if (value && value.length > 0) {
-//                             NFTList[key] = [...NFTList[key], ...value];
-//                         }
-//                     }
-//                     //console.log(response);
-//                 }
-//             });
+// TODO: add authentication
+app.get("/v1/submitteam/:gallery", authenticateToken, async (req, res) => {
+    try {
+
+
+        const gallery = req.paramString("gallery");
+
+        // get user's NFTs
+        const wallet = await db.getWallet(gallery);
+
+        const teamData = await db.getTeamStatus(gallery);
+
+        if (wallet.length <= 0) {
+            throw { message: "Gallery does not exist." };
+        }
+
+        const wallet_addr = wallet[0].address;
+
+        const catalogSize = await cacheCollectionCt();
+
+        const dataLoad = await walletCache(wallet[0].alias, catalogSize, wallet);
+        const NFTList = dataLoad.NFTList;
+
+        const relevantTeamNFTs = teamData.length > 0 ? JSON.parse(teamData[0].team).filter(x => x !== null).map(teammember => {
+
+            return NFTList[teammember.collection]?.find(x => x.id == teammember.id)
+        }) : [];
 
 
 
-
-//             zip.file("nfts.txt", JSON.stringify(NFTList));
-
-//             zip
-//                 .generateNodeStream({ type: 'nodebuffer', streamFiles: true, compression: "DEFLATE" })
-//                 .pipe(fs.createWriteStream(cacheFile))
-//                 .on('finish', function () {
-//                     // JSZip generates a readable stream with a "end" event,
-//                     // but is piped here in a writable stream which emits a "finish" event.
-//                     console.log(cacheFile + " written.");
-
-//                     setTimeout(() => {
-//                         try {
-//                             // delete the file after 5 mins
-//                             if (fs.existsSync(cacheFile))
-//                                 fs.unlinkSync(cacheFile);
-//                         } catch {
-//                             console.log("Failed to delete cache file.");
-//                         }
-//                     }, 60 * 1000 * 60);
-//                 });
+        await asyncForEach(relevantTeamNFTs, async (nftdata) => {
+            // Insert each NFT data from the team if it doesn't exist
+            await db.addTrackedNFT(nftdata.collectionName, nftdata.id, JSON.stringify(nftdata), 'FLOW');
+        });
 
 
 
-//         }
+        res.send({ message: "SUCCESS" });
 
-//         //gallery_status: await db.getTeamStatus(gallery)
+    } catch (ex) {
+        res.statusCode = 403;
+        return res.send({ message: ex.message });
 
-//         // Generate relevent NFT data only and save to the DB
-//         // state.gamestate.loadedGallery.nfts[props.data.collection]?.find(x => x.id == props.data.id)
-//         const relevantTeamNFTs = teamData.length > 0 ? JSON.parse(teamData[0].team).filter(x => x !== null).map(teammember => {
+    }
+});
 
-//             return NFTList[teammember.collection]?.find(x => x.id == teammember.id)
-//         }) : [];
 
-//         console.log(relevantTeamNFTs);
+app.get("/v1/nft/:collection/:nftid", async (req, res) => {
+    try {
 
-//         res.send({ gallery: gallery, catalogSize: catalogSize, owner: wallet_addr, user_status: status, nfts: NFTList, teams: teamData.length > 0 ? teamData[0].team : null, cache_served });
+        const collection = req.paramString("collection");
+        const nftid = req.paramString("nftid");
 
-//     } catch (ex) {
-//         res.statusCode = 403;
-//         return res.send({ message: ex.message });
+        // get user's NFTs
+        const nftdata = await db.getTrackedNFT(collection, nftid, 'FLOW');
 
-//     }
-// });
+
+
+        res.send({ nftdata: nftdata.length === 1 ? nftdata[0] : null });
+
+    } catch (ex) {
+        res.statusCode = 403;
+        return res.send({ message: ex.message });
+
+    }
+});
+
+
 
 // Serve react frontend
 const buildPath = path.normalize(path.join(__dirname, '../client/dist'));
