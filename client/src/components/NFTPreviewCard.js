@@ -9,8 +9,8 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 import { gameActions } from '../store/gamestate';
 
 const Clipper = styled.div`
-width: 10rem;
-height: 10rem;
+width: 9rem;
+height: 9rem;
 overflow: hidden;
 display: flex;
     align-items: center;
@@ -21,7 +21,7 @@ display: flex;
 `
 
 const NFTBezel = styled.div`
-max-height: 10.4rem;
+max-height: 9.4rem;
 overflow: hidden;
 `
 
@@ -71,35 +71,37 @@ const NFTPreviewCard = (props) => {
     console.log("DRAW NFTPREVIEW");
 
     return !props.data || !myNFT ? <NFTTitle>Not Loaded. </NFTTitle> :
-        <NFTBezel>        <Container>
-            <Row>
-                <Col xs={3}>
-                    <Clipper>
-                        <ResizedImage style={{ width: '10rem', imageRendering: "pixelated" }} src={myNFT.thumbnail} maxWidth={64} />
-                    </Clipper>
-                </Col>
-                <Col xs={9}>
-                    <Container style={{ padding: '1rem' }}>
-                        <Row>
-                            <Col><NFTTitle len={myNFT.name.length}>{myNFT.name}</NFTTitle></Col>
-                        </Row>
-                        <Row>
-                            <Col xs={9}>{myNFT.id} / ???</Col>
-                            <Col xs={2}>{trackedNFTData ? (trackedNFTData.level > 0 ? `:L${trackedNFTData.level}` : ':NEW!') : `:L0`}</Col>
-                        </Row>
-                        <Row>
+        <NFTBezel>
 
-                            <Col>HP<div style={{ height: '1rem', width: '17rem', border: '0.2rem solid black', marginLeft: '0.5rem', display: 'inline-block', top: '-0.3rem', position: 'relative' }}><ProgressBar variant="danger" now={trackedNFTData ? trackedNFTData.health : 100} max="100"></ProgressBar></div></Col>
-                        </Row>
-                        <Row>
+            <Container fluid={true}>
+                <Row>
+                    <Col xs={3}>
+                        <Clipper>
+                            <ResizedImage style={{ width: '8rem', imageRendering: "pixelated" }} src={myNFT.thumbnail} maxWidth={64} />
+                        </Clipper>
+                    </Col>
+                    <Col xs={9}>
+                        <Container style={{ padding: '1rem' }}>
+                            <Row>
+                                <Col><NFTTitle len={myNFT.name.length}>{myNFT.name}</NFTTitle></Col>
+                            </Row>
+                            <Row>
+                                <Col xs={9}>{myNFT.id} / ???</Col>
+                                <Col xs={2}>{trackedNFTData ? (trackedNFTData.level > 0 ? `:L${trackedNFTData.level}` : ':NEW!') : `:L0`}</Col>
+                            </Row>
+                            <Row>
 
-                            <Col style={{ fontSize: '0.7rem' }}>{myNFT.description.length > 120 ? myNFT.description.substring(0, 120) + "..." : myNFT.description}</Col>
-                        </Row>
-                    </Container>
+                                <Col>HP<div style={{ height: '1rem', width: '17rem', border: '0.2rem solid black', marginLeft: '0.5rem', display: 'inline-block', top: '-0.3rem', position: 'relative' }}><ProgressBar variant="danger" now={trackedNFTData ? trackedNFTData.health : 100} max="100"></ProgressBar></div></Col>
+                            </Row>
+                            <Row>
 
-                </Col>
-            </Row>
-        </Container>
+                                <Col style={{ fontSize: '0.7rem' }}>{myNFT.description.length > 120 ? myNFT.description.substring(0, 120) + "..." : myNFT.description}</Col>
+                            </Row>
+                        </Container>
+
+                    </Col>
+                </Row>
+            </Container>
         </NFTBezel>
 
         ;

@@ -14,8 +14,8 @@ import NFTPreviewCard from './NFTPreviewCard';
 const PixelContainer = React.memo(styled.div`
 background-image: URL('${require('../../public/PixelFrame.png')}');
 image-rendering: pixelated;
-background-size: contain;
- height: 11rem;
+background-size: 100% 100%;
+ height: 10rem;
   width: 36rem; 
   background-repeat: no-repeat;
 margin: 0.1rem auto 0.1rem auto;

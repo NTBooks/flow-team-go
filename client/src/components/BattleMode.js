@@ -44,7 +44,28 @@ const BattleMode = (props) => {
 
     const unboundGameState = useStore().getState().gamestate;
 
-    const vsMenuHandler = (cmd) => {
+    const vsMenuHandler = async (cmd) => {
+
+        console.log(cmd);
+
+        switch (cmd) {
+            case 'Go!':
+                //TODO: Add loader
+                const submitTeamResult = await fetch('/v1/submitteam/' + unboundGameState.gallery, { method: 'GET', headers: { 'authorization': unboundGameState.jwt } });
+                console.log(submitTeamResult);
+
+                if (submitTeamResult.status !== 200) {
+                    console.log(submitTeamResult);
+                    return;
+                }
+
+                // Success!
+                // OK so active teams are teams with A and B squads or just B squad. Some NFTs need health > 0
+                // Should be able to figure this out...
+
+
+                return;
+        }
 
     };
 
@@ -54,8 +75,8 @@ const BattleMode = (props) => {
                 <div className={'nes-container with-title'} style={{ width: '30rem', padding: '1rem 1rem 1rem 0' }}>
                     <Container>
                         <Row>
-                            <Col md={8}> <p><strong>Ready to compete?</strong><br /><br /> Upload your team to Cloud Arena!</p></Col>
-                            <Col md={4}>
+                            <Col xs={8}> <p><strong>Ready to compete?</strong><br /><br /> Press "A" to upload your team to Cloud Arena!</p></Col>
+                            <Col xs={4}>
 
                                 <CrazyImage src={require('../../public/GoLogoPNG.png')} style={{ imageRendering: 'pixelated', height: '8rem' }} />
 
@@ -102,7 +123,8 @@ const BattleMode = (props) => {
 
             {allChecks ? <SFXMenu setkey="vssfx" mainMenuHandler={vsMenuHandler} selectableObjects={selectableObjects} onCancel={() => { }} /> :
 
-                <Alert className={'nes-container with-title'} style={{ width: '30rem', padding: '1rem 1rem 1rem 0', margin: '2rem auto 0 auto', textAlign: 'center' }}>                    Complete the items above for your team to be eligible to compete in the Cloud Arena!
+                <Alert className={'nes-container with-title'} style={{ width: '30rem', padding: '1rem 1rem 1rem 0', margin: '2rem auto 0 auto', textAlign: 'center' }}>
+                    Complete the items above for your team to be eligible to compete in the Cloud Arena!
                 </Alert>
             }
 
