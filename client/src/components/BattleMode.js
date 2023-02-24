@@ -102,8 +102,7 @@ const BattleMode = (props) => {
 
             {allChecks ? <SFXMenu setkey="vssfx" mainMenuHandler={vsMenuHandler} selectableObjects={selectableObjects} onCancel={() => { }} /> :
 
-                <Alert className={'nes-container with-title'} style={{ width: '30rem', padding: '1rem 1rem 1rem 0', textAlign: 'center' }}>
-                    Complete the items above for your team to be eligible to compete in the Cloud Arena!
+                <Alert className={'nes-container with-title'} style={{ width: '30rem', padding: '1rem 1rem 1rem 0', margin: '2rem auto 0 auto', textAlign: 'center' }}>                    Complete the items above for your team to be eligible to compete in the Cloud Arena!
                 </Alert>
             }
 
