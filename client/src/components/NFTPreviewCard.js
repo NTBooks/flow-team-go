@@ -43,6 +43,8 @@ const NFTPreviewCard = (props) => {
 
     console.log(myNFT, props.data);
 
+
+
     const dispatch = useDispatch();
 
     useEffect(() => {

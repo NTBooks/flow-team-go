@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import SFXMenu from './SFXMenu';
 import RegisterModal from './RegisterModal';
 import LoginModal from './LoginModal';
+import Alert from 'react-bootstrap/Alert';
 
 const OptionsLabel = styled.span`
 font-size: 1.5rem;
@@ -81,7 +82,7 @@ const OptionsPane = (props) => {
             ctrl: <SelectableWrapper key={'bgm'} style={{ height: '3rem' }}>
                 <Container>
 
-                    <Row>
+                    <Row style={{ position: 'relative', top: '0.4rem' }}>
                         <Col xs={2}><OptionsLabel> BGM </OptionsLabel></Col>
                         <Col xs={5} onClick={() => { dispatch(gameActions.toggleBGM({ set: true })); }}><OnOffLabel>[{BGMState ? 'X' : ' '}] ON</OnOffLabel></Col>
                         <Col xs={5} onClick={() => { dispatch(gameActions.toggleBGM({ set: false })); }}><OnOffLabel>[{!BGMState ? 'X' : ' '}] OFF</OnOffLabel></Col>
@@ -93,71 +94,52 @@ const OptionsPane = (props) => {
         {
             ctrl: <SelectableWrapper key={'sfx'} style={{ height: '3rem' }}>
                 <Container>
-                    <Row>
+                    <Row style={{ position: 'relative', top: '0.4rem' }}>
                         <Col xs={2}><OptionsLabel> SFX </OptionsLabel></Col>
                         <Col xs={5} onClick={() => { dispatch(gameActions.toggleSFX({ set: true })); huzuh(); }}><OnOffLabel>[{SFXState ? 'X' : ' '}] ON</OnOffLabel></Col>
                         <Col xs={5} onClick={() => { dispatch(gameActions.toggleSFX({ set: false })) }}><OnOffLabel>[{!SFXState ? 'X' : ' '}] OFF</OnOffLabel></Col>
                     </Row>
                 </Container></SelectableWrapper>, val: 'SFX'
-        },
-        { ctrl: <SelectableWrapper key={'new'} style={{ paddingTop: '1rem' }}> <OptionsLabel> New Team </OptionsLabel>  </SelectableWrapper>, val: 'New Team' }
+        }
+
 
 
     ];
 
     if (JWT) {
         selectableObjects2.push({
-            ctrl: <SelectableWrapper key={'pin'} style={{ paddingTop: '1rem', color: "#0000cc" }}> <OptionsLabel> Set PIN </OptionsLabel>
+            ctrl: <SelectableWrapper key={'pin'} style={{ paddingTop: '1rem', color: "#0000cc" }}> <OptionsLabel style={{ position: 'relative', top: '0.4rem' }}> Change PIN </OptionsLabel>
 
             </SelectableWrapper>, val: 'Set Pin'
         })
     } else {
         selectableObjects2.push({
-            ctrl: <SelectableWrapper key={'login'} style={{ paddingTop: '1rem', color: "#cc0000" }}> <OptionsLabel> Login with PIN </OptionsLabel>
+            ctrl: <SelectableWrapper key={'login'} style={{ paddingTop: '1rem', color: "#cc0000" }}> <OptionsLabel style={{ position: 'relative', top: '0.4rem' }}> Login with PIN </OptionsLabel>
 
             </SelectableWrapper>, val: 'Login'
         })
     }
 
+    selectableObjects2.push({ ctrl: <SelectableWrapper key={'new'} style={{ paddingTop: '1rem' }}> <OptionsLabel style={{ position: 'relative', top: '0.4rem' }}> New Team </OptionsLabel>  </SelectableWrapper>, val: 'New Team' })
 
 
     // TODO: Use SFXMenu to cut down on code reuse
     return <>
 
 
-        <h3 style={{ margin: '3rem', fontSize: '3rem' }} className='title'>Options</h3>
+        <h3 style={{ margin: '1rem 1rem 1rem 1rem', fontSize: '3rem' }} className='title'>Options</h3>
 
-        <div className={'nes-container with-title'} style={{ margin: '3rem' }}>
-            <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>System</h3>
+        <div className={'nes-container with-title'} style={{ margin: '3rem 3rem 1rem 3rem' }}>
+            <h3 className='title' style={{ fontSize: '1.5rem', marginTop: '-2.5rem' }}>System</h3>
 
             <SFXMenu setkey="optsfx" mainMenuHandler={menuHandler} selectableObjects={selectableObjects2} exiting={false} />
-            {/* {selectableObjects[0]}
-            <Container>
-                <Row>
-                    <Col></Col>
-                    <Col onClick={() => { dispatch(gameActions.toggleBGM({ set: true })); }}>[{BGMState ? 'X' : ' '}] ON</Col>
-                    <Col onClick={() => { dispatch(gameActions.toggleBGM({ set: false })); }}>[{!BGMState ? 'X' : ' '}] OFF</Col>
-                </Row>
-            </Container>
 
-            <br />
-            {selectableObjects[1]}
-            <Container>
-                <Row>
-                    <Col></Col>
-                    <Col onClick={() => { dispatch(gameActions.toggleSFX({ set: true })); huzuh(); }}>[{SFXState ? 'X' : ' '}] ON</Col>
-                    <Col onClick={() => { dispatch(gameActions.toggleSFX({ set: false })) }}>[{!SFXState ? 'X' : ' '}] OFF</Col>
-                </Row>
-            </Container> */}
 
         </div>
-        {/* 
-        <div className={'nes-container with-title'} style={{ margin: '3rem' }}>
-            <h3 className='title' style={{ fontSize: '2rem', marginTop: '-2.5rem' }}>System</h3>
 
-            {selectableObjects[2]}
-            {selectableObjects[3]}
-        </div> */}
+        <Alert className={'nes-container with-title'} style={{ width: '30rem', padding: '1rem 1rem 1rem 0', margin: '1rem auto 0 auto', textAlign: 'center' }}>
+            Setting a PIN will let you edit this team even if you clear your local save or switch devices.
+        </Alert>
         <RegisterModal show={showRegister} onClose={() => { setShowRegister(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
         <LoginModal show={showLogin} onClose={() => { setShowLogin(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
     </>;

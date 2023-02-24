@@ -9,6 +9,7 @@ import AnimatedText from 'react-animated-text-content';
 import SelectNFTPane from './SelectNFTPane';
 import { gameActions } from '../store/gamestate';
 import NFTPreviewCard from './NFTPreviewCard';
+import LoginModal from './LoginModal';
 
 
 const PixelContainer = React.memo(styled.div`
@@ -25,6 +26,7 @@ opacity: 0.8;
 
 
 const TeamPane = (props) => {
+    const dispatch = useDispatch();
 
     const paneTeam1 = useSelector(state => props.letter === "A" ? state.gamestate.team_a[0] : state.gamestate.team_b[0]);
     const paneTeam2 = useSelector(state => props.letter === "A" ? state.gamestate.team_a[1] : state.gamestate.team_b[1]);
@@ -38,7 +40,8 @@ const TeamPane = (props) => {
 
     const [paneMode, setPaneMode] = useState('List'); // Select
     const [selectedSlot, setSelectedSlot] = useState(0); // Select
-    const dispatch = useDispatch();
+
+    const [showLogin, setShowLogin] = useState();
 
     const funnyLoadingMessages = [
         "Just catching some unicorns to power up the server...",
@@ -93,10 +96,12 @@ const TeamPane = (props) => {
     ];
 
     const menuHandler = (cmd) => {
-
-        console.log(cmd);
-        setPaneMode('Select');
-        setSelectedSlot(cmd);
+        if (unboundGameState.jwt) {
+            setPaneMode('Select');
+            setSelectedSlot(cmd);
+        } else {
+            setShowLogin(true);
+        }
 
     };
 
@@ -231,7 +236,7 @@ const TeamPane = (props) => {
                 </div> : <div style={{ textAlign: "center" }}>Checking cache...</div>) :
             <SFXMenu setkey={`teamsfx${props.letter}`} selectableObjects={selectableObjects} mainMenuHandler={menuHandler} />}
 
-
+        <LoginModal show={showLogin} onClose={() => { setShowLogin(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
 
 
     </> : <SelectNFTPane pickNFTHandler={(e) => { console.log(e); if (e !== null) addToTeam(e); setPaneMode('List'); }} />;

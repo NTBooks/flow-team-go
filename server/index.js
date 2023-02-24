@@ -250,7 +250,7 @@ app.post("/v1/updateteam", authenticateToken, async (req, res) => {
 
         // Team should be an array of 6 {id, collection}
 
-        await db.updateTeam(req.user.userName, cleanedTeam);
+        await db.updateTeam(req.user.userName, cleanedTeam, false);
 
 
         // Send a fresh token
@@ -470,7 +470,9 @@ app.get("/v1/submitteam/:gallery", authenticateToken, async (req, res) => {
             await db.addTrackedNFT(nftdata.collectionName, nftdata.id, JSON.stringify(nftdata), 'FLOW');
         });
 
-
+        await db.updateTeam(req.user.userName, relevantTeamNFTs.map(x => {
+            return { collection: x.collectionName, id: +x.id }
+        }), true);
 
         res.send({ message: "SUCCESS" });
 
@@ -502,6 +504,92 @@ app.get("/v1/nft/:collection/:nftid", async (req, res) => {
     }
 });
 
+
+app.get("/v1/getbattleteam/:gallery", async (req, res) => {
+    try {
+
+        const gallery = req.paramString("gallery");
+
+        // get user's NFTs
+        const wallet = await db.getWallet(gallery);
+        const teamData = await db.getTeamStatus(gallery, 1);
+
+        if (teamData.length < 1) {
+            throw "No team data loaded."
+        }
+
+        const battleHeaders = await db.getBattleHeaders(teamData[0].id);
+
+        res.send({ battleHeaders, teamData, gallery, wallet });
+
+    } catch (ex) {
+        res.statusCode = 500;
+        return res.send({ message: ex.message });
+
+    }
+
+});
+
+async function RunMatch(teamA, teamB) {
+    // Get the data for the relevant NFTs
+    // Get the stats data for those NFTs
+
+    // Set initial conditions
+
+    // Run rounds of (random attribute), (up or down or middle)
+    // Create deltas and update in memory stats
+    // Swap in B team
+    // Add winner record once one team is KOed 
+
+}
+
+
+
+app.get("/v1/randombattle", authenticateToken, async (req, res) => {
+    try {
+
+        // TODO: Check when last battle was and make sure it's been at least 10 secs
+
+        const gallery = req.user.userName.substring(0, req.user.userName.indexOf(","));
+
+        // get user's NFTs
+        const eligibleTeams = await db.getBattleTeamList(0);
+
+
+        const teamAData = await db.getTeamStatus(gallery, 1);
+
+
+        if (teamAData.length < 1) {
+            throw "No team data loaded."
+        }
+
+        if (eligibleTeams.length < 1) {
+            throw "No eligible teams."
+        }
+
+        const randomTeam = eligibleTeams[Math.floor(Math.random() * eligibleTeams.length)];
+        const randomTeamGallery = randomTeam.userName.substring(0, randomTeam.userName.indexOf(","));
+
+        const teamBData = await db.getTeamStatus(randomTeamGallery, 1);
+
+        // Run the match...
+
+
+        // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
+        // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
+
+        res.send({ teamData: { A: teamAData, B: teamBData }, gallery, wallet });
+
+    } catch (ex) {
+        res.statusCode = 500;
+        return res.send({ message: ex.message });
+
+    }
+
+});
+
+
+//getTeamStatus
 
 
 // Serve react frontend

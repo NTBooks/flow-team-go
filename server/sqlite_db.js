@@ -32,7 +32,7 @@ dbWrapper
                 );
 
                 await db.run(
-                    "CREATE TABLE Team (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, team TEXT)"
+                    "CREATE TABLE Team (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, team TEXT, battlemode INT)"
                 );
 
                 await db.run(
@@ -41,6 +41,15 @@ dbWrapper
 
                 await db.run(
                     "CREATE TABLE NFTStats (id INTEGER PRIMARY KEY AUTOINCREMENT, collection TEXT, nftid INT, chain TEXT, health INT, level INT, content TEXT)"
+                );
+
+                // Store copies of the team composition
+                await db.run(
+                    "CREATE TABLE BattleHeader (id INTEGER PRIMARY KEY AUTOINCREMENT, teamA TEXT, teamB TEXT, teamAGalleryID TEXT, teamBGalleryID TEXT, battleDate DATETIME, viewed INT, winner TEXT)"
+                );
+
+                await db.run(
+                    "CREATE TABLE BattleLine (id INTEGER PRIMARY KEY AUTOINCREMENT, headerID INT, statRoll INT, highestLowestRoll INT, idStatsDeltas TEXT )"
                 );
             }
         } catch (dbError) {
@@ -163,10 +172,10 @@ module.exports = {
             console.error(dbError);
         }
     },
-    getTeamStatus: async (username) => {
+    getTeamStatus: async (username, battlemode = 0) => {
         try {
             const option = await db.all(
-                `SELECT * FROM Team WHERE userName like ?||',%' ORDER BY id ASC LIMIT 1
+                `SELECT * FROM Team WHERE battlemode = ${battlemode} AND userName like ?||',%' ORDER BY id DESC LIMIT 1
               `
                 , [username]
             );
@@ -176,22 +185,24 @@ module.exports = {
             console.error(dbError);
         }
     },
-    updateTeam: async (username, team) => {
+    updateTeam: async (username, team, battleMode) => {
         try {
 
+            // Keep battle teams forever so they can be used in the records
+            if (battleMode === 0) {
+                await db.all(
+                    `DELETE FROM Team 
+                WHERE  userName = ? AND battlemode = ?`
 
-            const deleteOld = await db.all(
-                `DELETE FROM Team 
-                WHERE  userName = ?`
-
-                , [username]
-            );
+                    , [username, battleMode]
+                );
+            }
 
             const option = await db.all(
-                `INSERT INTO Team (userName, team) VALUES (?, ?)
+                `INSERT INTO Team (userName, team, battlemode) VALUES (?, ?, ?)
               `
 
-                , [username, JSON.stringify(team)]
+                , [username, JSON.stringify(team), battleMode]
             );
 
             return option;
@@ -233,6 +244,106 @@ module.exports = {
             console.error(dbError);
         }
     },
+    createNewBattle: async (teamA, teamB, teamAName, teamBName) => {
+        try {
+
+
+
+            const option = await db.all(
+                `INSERT INTO BattleHeader (teamA, teamB, teamAGalleryID, teamBGalleryID, battleDate, viewed) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0)
+              `
+
+                , [JSON.stringify(teamA), JSON.stringify(teamB), teamAName, teamBName]
+            );
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+    getBattleHeaders: async (gallery) => {
+        try {
+
+
+
+            const option = await db.all(
+                `SELECT * FROM BattleHeader WHERE teamAGalleryID = ? OR teamBGalleryID = ?
+              `
+
+                , [gallery, gallery]
+            );
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+    setBattleViewed: async (id) => {
+        try {
+
+
+
+            const option = await db.all(
+                `UPDATE BattleHeader SET viewed = true WHERE id = ?
+              `
+
+                , [id]
+            );
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+    setBattleWinner: async (id) => {
+        try {
+
+
+
+            const option = await db.all(
+                `UPDATE BattleHeader SET winner = true WHERE id = ?
+              `
+
+                , [id]
+            );
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+    addBattleLine: async (id) => {
+        try {
+
+            // Use special statRoll for end of battle
+
+            const option = await db.all(
+                `INSERT INTO BattleLine (headerID, statRoll, highestLowestRoll, idStatsDeltas) VALUES (?, ?, ?, ?, ?)
+              `
+
+                , [username, JSON.stringify(team), battleMode]
+            );
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+    getBattleTeamList: async (newerThanID = 0) => {
+        try {
+            const option = await db.all(
+                `SELECT DISTINCT userName FROM Team WHERE id > ${newerThanID} AND battlemode = 1 ORDER BY id DESC LIMIT 1000
+              `
+
+            );
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+
+    }
+
+    // INT, StatRoll INT, HighestLowestRoll INT, IDStatsList TEXT
 
 
 };
