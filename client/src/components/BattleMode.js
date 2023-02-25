@@ -136,7 +136,7 @@ const BattleMode = (props) => {
 
     return (
 
-        unboundGameState.jwt && sendingTeam === 3 ? <BattleLobby data={loadedTeam} />
+        sendingTeam === 3 ? <BattleLobby data={loadedTeam} />
             :
             <div style={{ padding: '1rem' }}>
                 <h1>Match Prep</h1>

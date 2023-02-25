@@ -249,11 +249,32 @@ module.exports = {
 
 
 
-            const option = await db.all(
-                `INSERT INTO BattleHeader (teamA, teamB, teamAGalleryID, teamBGalleryID, battleDate, viewed) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0)
-              `
+            const option = await db.get(
+                `INSERT INTO BattleHeader (teamA, teamB, teamAGalleryID, teamBGalleryID, battleDate, viewed) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0);`
 
                 , [JSON.stringify(teamA), JSON.stringify(teamB), teamAName, teamBName]
+            );
+
+            const inserted = await db.get(
+                `SELECT last_insert_rowid() as rowID`
+
+
+            );
+
+            return inserted.rowID;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+    getMatchData: async (NFTList) => {
+        try {
+
+            // We have list of collection and id, want to get list of NFT Stats and NFT Data per those lists
+            // SELECT Collection then INNER JOIN the ID
+
+            const qry = `SELECT * FROM NFTStats WHERE nftid||':'||collection IN (${NFTList.map(x => `'${x.id}:${x.collection}'`).join(',')})`;
+
+            const option = await db.all(qry
             );
 
             return option;
@@ -295,16 +316,16 @@ module.exports = {
             console.error(dbError);
         }
     },
-    setBattleWinner: async (id) => {
+    setBattleWinner: async (id, ownerWon) => {
         try {
 
 
 
             const option = await db.all(
-                `UPDATE BattleHeader SET winner = true WHERE id = ?
+                `UPDATE BattleHeader SET winner = ? WHERE id = ?
               `
 
-                , [id]
+                , [ownerWon, id]
             );
 
             return option;
@@ -312,16 +333,16 @@ module.exports = {
             console.error(dbError);
         }
     },
-    addBattleLine: async (id) => {
+    addBattleLine: async (headerID, statRoll, hiLoRoll, statDeltas) => {
         try {
 
             // Use special statRoll for end of battle
 
             const option = await db.all(
-                `INSERT INTO BattleLine (headerID, statRoll, highestLowestRoll, idStatsDeltas) VALUES (?, ?, ?, ?, ?)
+                `INSERT INTO BattleLine (headerID, statRoll, highestLowestRoll, idStatsDeltas) VALUES (?, ?, ?, ?)
               `
 
-                , [username, JSON.stringify(team), battleMode]
+                , [headerID, statRoll, hiLoRoll, JSON.stringify(statDeltas)]
             );
             return option;
         } catch (dbError) {
@@ -337,6 +358,28 @@ module.exports = {
             );
 
             return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+
+    },
+    getFullBattle: async (battleID) => {
+        try {
+            const header = await db.all(
+                `SELECT * FROM BattleHeader WHERE id = ?
+          `
+
+                , [battleID]
+            );
+
+            const lines = await db.all(
+                `SELECT * FROM BattleLine WHERE headerID = ?
+          `
+
+                , [battleID]
+            );
+            return { header, lines };
+
         } catch (dbError) {
             console.error(dbError);
         }

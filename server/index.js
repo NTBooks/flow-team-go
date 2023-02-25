@@ -28,6 +28,24 @@ function generateAccessToken(data, customExpire = null) {
     return jwt.sign(data, process.env.TOKEN_SECRET, { expiresIn: customExpire ? customExpire : (+process.env.SESSION_MINS) + 'm' });
 }
 
+const hiLoCodes = [
+    "Top",
+    "Bottom"
+]
+
+const attributeCodes = [
+    'Current HP', // Reserved for round 4+
+    'Smash', // Low Smash is 50%, high smash is 100%
+    'ID',
+    'Level',
+    'Description Length',
+    'Description Alphabetical',
+    'Name Length',
+    'Name Alphabetical',
+    'Collection Name Length',
+    'Collection Name Alphabetical',
+    'Doppleganger' // Special
+]
 
 
 function authenticateToken(req, res, next) {
@@ -541,6 +559,199 @@ async function RunMatch(teamA, teamB) {
     // Swap in B team
     // Add winner record once one team is KOed 
 
+    const teamAData = JSON.parse(teamA.team);
+    const teamBData = JSON.parse(teamB.team);
+
+    const matchCache = await db.getMatchData([...teamAData, ...teamBData]);
+
+
+
+    // A tream starts at their loaded health
+    // B team starts full
+    const gameState = {
+        A: teamAData.map(x => {
+            return { id: matchCache.find(y => y.nftid === x.id && y.collection === x.collection).id, hp: matchCache.find(y => y.nftid === x.id && y.collection === x.collection).health }
+        }),
+        B: teamBData.map(x => { return { id: matchCache.find(y => y.nftid === x.id && y.collection === x.collection).id, hp: 100 } })
+    }
+
+    // Mirror match means we KO one copy of each at random
+    // Then there is the fight
+    // TODO: Sees their doppleganger... but there can be only one! We are NON-FUNGIBLE!
+    // TODO: I found the imposter!
+
+    const battleID = await db.createNewBattle(teamA.id, teamB.id, teamA.userName, teamB.userName);
+
+    const dopplegangerList = gameState.A.filter(x => gameState.B.find(y => y.id === x.id));
+
+    const hiLo = () => {
+        return Math.floor(Math.random() * 2);
+    }
+
+
+    while (dopplegangerList.length > 0) {
+        const dupe = dopplegangerList.pop();
+        const hiLoRoll = hiLo();
+        if (hiLoRoll === 0) {
+            // Team A highlander rules
+            gameState.A.find(x => x.id === dupe.id).hp = 0;
+
+        } else {
+            // Team B highlander rules
+            gameState.B.find(x => x.id === dupe.id).hp = 0;
+        }
+        await db.addBattleLine(battleID, attributeCodes.indexOf('Doppleganger'), hiLoRoll, gameState);
+
+    }
+
+
+    const HPSum = (list) => {
+        if (list.length == 0)
+            return 0;
+        return list.reduce((accumulator, currentValue) =>
+            accumulator + currentValue.hp,
+            0);
+    }
+
+    const recursiveRound = async (rnd) => {
+        // See if any team A->A are around or if we're on A->B
+        const ActiveATeam = HPSum(gameState.A.slice(0, 3)) === 0 ? gameState.A.slice(3).filter(x => x.hp > 0) : gameState.A.slice(0, 3).filter(x => x.hp > 0);
+        const ActiveBTeam = HPSum(gameState.B.slice(0, 3)) === 0 ? gameState.B.slice(3).filter(x => x.hp > 0) : gameState.B.slice(0, 3).filter(x => x.hp > 0);
+
+        // check for KO
+        if (HPSum(gameState.A) <= 0) {
+
+            await db.setBattleWinner(battleID, false);
+            // write B winnter record
+            return; // don't recurse
+        }
+
+        if (HPSum(gameState.B) <= 0) {
+
+            await db.setBattleWinner(battleID, true);
+            // write B winnter record
+            return; // don't recurse
+        }
+
+
+        // Roll the contest
+        const hiLoRoll = hiLo();
+        const attributeRoll = rnd < 4 ? Math.floor(Math.random() * (attributeCodes.length - 2)) + 1 : Math.floor(Math.random() * (attributeCodes.length - 1));
+        const hitStrength = Math.floor(Math.random() * 30) + 30;
+        const aggregateList = [...ActiveATeam, ...ActiveBTeam];
+        const expandedAggregateList = aggregateList.map(x => {
+            const cacheHit = matchCache.find(y => y.id === x.id);
+            return {
+
+                objref: x, level: cacheHit.level, data: JSON.parse(cacheHit.content)
+            };
+        });
+
+        if (aggregateList === undefined || aggregateList.length === 0) {
+            debugger;
+        }
+
+        switch (attributeCodes[attributeRoll]) {
+            case 'Current HP':
+
+                const HPHit = hiLoRoll != 0 ?
+                    Math.max(...aggregateList.map(x => x.hp))
+                    : Math.min(...aggregateList.map(x => x.hp));
+
+                aggregateList.filter(x => x.hp === HPHit).forEach(x => x.hp -= hitStrength);
+
+                break;
+            case 'Smash':
+                const randomSelection = aggregateList[Math.floor(Math.random() * aggregateList.length)];
+                randomSelection.hp -= hiLoRoll * 50 + 50; // 50 or 100 damage
+
+                break;
+            case 'ID':
+                const IDHit = hiLoRoll != 0 ?
+                    Math.max(...expandedAggregateList.map(x => x.data.nftid))
+                    : Math.min(...expandedAggregateList.map(x => x.data.nftid));
+
+                expandedAggregateList.filter(x => x.data.nftid === IDHit).forEach(x => x.objref.hp -= hitStrength);
+
+                break;
+            case 'Level':
+
+                const LevelHit = hiLoRoll != 0 ?
+                    Math.max(...expandedAggregateList.map(x => x.level))
+                    : Math.min(...expandedAggregateList.map(x => x.level));
+
+                expandedAggregateList.filter(x => x.level === LevelHit).forEach(x => x.objref.hp -= hitStrength);
+
+                break;
+            case 'Description Length':
+                const DescLenHit = hiLoRoll != 0 ?
+                    Math.max(...expandedAggregateList.map(x => x.data.description.length))
+                    : Math.min(...expandedAggregateList.map(x => x.data.description.length));
+
+                expandedAggregateList.filter(x => x.data.description.length === DescLenHit).forEach(x => x.objref.hp -= hitStrength);
+
+                break;
+            case 'Description Alphabetical':
+                const sortedListD = expandedAggregateList.sort((a, b) => {
+                    return (a.data.description < b.data.description) ? -1 : (a.data.description > b.data.description) ? 1 : 0;
+
+                });
+                const objToChangeD = sortedListD[hiLoRoll == 0 ? 0 : sortedListD.length - 1].objref;
+
+                objToChangeD.hp -= hitStrength;
+            case 'Name Length':
+                const NameLenHit = hiLoRoll != 0 ?
+                    Math.max(...expandedAggregateList.map(x => x.data.name.length))
+                    : Math.min(...expandedAggregateList.map(x => x.data.name.length));
+
+                expandedAggregateList.filter(x => x.data.name.length === NameLenHit).forEach(x => x.objref.hp -= hitStrength);
+
+                break;
+            case 'Name Alphabetical':
+                const sortedListN = expandedAggregateList.sort((a, b) => {
+                    return (a.data.name < b.data.name) ? -1 : (a.data.name > b.data.name) ? 1 : 0;
+
+                });
+                const objToChangeN = sortedListN[hiLoRoll == 0 ? 0 : sortedListN.length - 1].objref;
+
+
+                objToChangeN.hp -= hitStrength;
+                break;
+            case 'Collection Name Length':
+                const CollLenHit = hiLoRoll != 0 ?
+                    Math.max(...expandedAggregateList.map(x => x.data.collectionName.length))
+                    : Math.min(...expandedAggregateList.map(x => x.data.collectionName.length));
+
+                expandedAggregateList.filter(x => x.data.collectionName.length === CollLenHit).forEach(x => x.objref.hp -= hitStrength);
+
+                break;
+            case 'Collection Name Alphabetical':
+                const sortedListC = expandedAggregateList.sort((a, b) => {
+                    return (a.data.collectionName < b.data.collectionName) ? -1 : (a.data.collectionName > b.data.collection) ? 1 : 0;
+
+                });
+                const objToChange = sortedListC[hiLoRoll == 0 ? 0 : sortedListC.length - 1].objref;
+
+                objToChange.hp -= hitStrength;
+                break;
+            default:
+                throw "illegal roll";
+
+        }
+
+        aggregateList.forEach(x => { x.hp = Math.max(x.hp, 0) });
+
+        await db.addBattleLine(battleID, attributeRoll, hiLoRoll, gameState);
+
+        await recursiveRound(rnd + 1);
+
+
+    }
+
+    await recursiveRound(0);
+
+    return battleID;
+
 }
 
 
@@ -573,12 +784,15 @@ app.get("/v1/randombattle", authenticateToken, async (req, res) => {
         const teamBData = await db.getTeamStatus(randomTeamGallery, 1);
 
         // Run the match...
+        const result = await RunMatch(teamAData[0], teamBData[0]);
 
+
+        const fullBattle = await db.getFullBattle(result);
 
         // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
         // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
 
-        res.send({ teamData: { A: teamAData, B: teamBData }, gallery, wallet });
+        res.send({ ...fullBattle, teamAData, teamBData });
 
     } catch (ex) {
         res.statusCode = 500;
