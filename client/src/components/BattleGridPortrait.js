@@ -60,11 +60,13 @@ const BattleGridPortrait = (props) => {
                     console.log("FOUND", TrackedNFTRequestData.nftdata);
                     dispatch(gameActions.addNFTStats({ nftdata: TrackedNFTRequestData.nftdata }))
 
-                } else {
-                    console.log("NOT FOUND", TrackedNFTRequestData.nftdata);
-                    // Doesn't exist, so stub it in so it won't repeat the request
-                    dispatch(gameActions.addNFTStats({ nftdata: { nftid: myNFT.id, health: 100, level: -1, collection: myNFT.collection } }))
                 }
+
+                // else {
+                //     console.log("NOT FOUND", TrackedNFTRequestData.nftdata);
+                //     // Doesn't exist, so stub it in so it won't repeat the request
+                //     dispatch(gameActions.addNFTStats({ nftdata: { nftid: myNFT.id, health: 100, level: -1, collection: myNFT.collection } }))
+                // }
 
 
             })();

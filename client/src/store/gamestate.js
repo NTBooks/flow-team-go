@@ -64,6 +64,12 @@ const gameSlice = createSlice({
                 state.nftStats = [...state.nftStats, action.payload.nftdata];
             }
         },
+        removeNFTStats(state, action) {
+
+            state.nftStats = [...state.nftStats.filter(x => x.id != action.payload.id)];
+
+
+        },
         addToTeam(state, action) {
             // TODO: write add to team logic
             // Needs Team (A or B)

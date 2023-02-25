@@ -478,21 +478,22 @@ app.get("/v1/submitteam/:gallery", authenticateToken, async (req, res) => {
 
         const relevantTeamNFTs = teamData.length > 0 ? JSON.parse(teamData[0].team).filter(x => x !== null).map(teammember => {
 
-            return NFTList[teammember.collection]?.find(x => x.id == teammember.id)
+            return { ...NFTList[teammember.collection]?.find(x => x.id == teammember.id), collectionID: teammember.collection }
         }) : [];
 
 
 
         await asyncForEach(relevantTeamNFTs, async (nftdata) => {
             // Insert each NFT data from the team if it doesn't exist
-            await db.addTrackedNFT(nftdata.collectionName, nftdata.id, JSON.stringify(nftdata), 'FLOW');
+            await db.addTrackedNFT(nftdata.collectionID, nftdata.id, JSON.stringify(nftdata), 'FLOW');
         });
 
-        await db.updateTeam(req.user.userName, relevantTeamNFTs.map(x => {
-            return { collection: x.collectionName, id: +x.id }
-        }), true);
+        const newTeam = relevantTeamNFTs.map(x => {
+            return { collection: x.collectionID, id: +x.id }
+        });
+        await db.updateTeam(req.user.userName, newTeam, true);
 
-        res.send({ message: "SUCCESS" });
+        res.send({ message: "SUCCESS", team: newTeam });
 
     } catch (ex) {
         res.statusCode = 403;
@@ -614,6 +615,8 @@ async function RunMatch(teamA, teamB) {
             0);
     }
 
+    let statChanges = [];
+
     const recursiveRound = async (rnd) => {
         // See if any team A->A are around or if we're on A->B
         const ActiveATeam = HPSum(gameState.A.slice(0, 3)) === 0 ? gameState.A.slice(3).filter(x => x.hp > 0) : gameState.A.slice(0, 3).filter(x => x.hp > 0);
@@ -638,6 +641,7 @@ async function RunMatch(teamA, teamB) {
 
             ActiveATeam.filter(x => x.hp > 0).forEach(async y => {
                 await db.levelUp(y.id);
+                statChanges.push({ id: y.id });
             });
 
 
@@ -762,7 +766,7 @@ async function RunMatch(teamA, teamB) {
     await db.addBattleLine(battleID, -1, -1, gameState);
     await recursiveRound(0);
 
-    return battleID;
+    return [battleID, statChanges];
 
 }
 
@@ -799,12 +803,12 @@ app.get("/v1/randombattle", authenticateToken, async (req, res) => {
         const result = await RunMatch(teamAData[0], teamBData[0]);
 
 
-        const fullBattle = await db.getFullBattle(result);
+        const fullBattle = await db.getFullBattle(result[0]);
 
         // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
         // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
 
-        res.send({ ...fullBattle, teamAData, teamBData });
+        res.send({ ...fullBattle, teamAData, teamBData, statChanges: result[1] });
 
     } catch (ex) {
         res.statusCode = 500;
@@ -840,12 +844,12 @@ app.get("/v1/vsbattle/:opponent", authenticateToken, async (req, res) => {
         const result = await RunMatch(teamAData[0], teamBData[0]);
 
 
-        const fullBattle = await db.getFullBattle(result);
+        const fullBattle = await db.getFullBattle(result[0]);
 
         // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
         // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
 
-        res.send({ ...fullBattle, teamAData, teamBData });
+        res.send({ ...fullBattle, teamAData, teamBData, statChanges: result[1] });
 
     } catch (ex) {
         res.statusCode = 500;

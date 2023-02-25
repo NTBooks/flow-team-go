@@ -66,9 +66,15 @@ const BattleMode = (props) => {
 
 
         setSendingTeam(3);
+        console.log("UPDATE REFRESH HANDLER", battleTeamData);
         setLoadedTeam(battleTeamData);
 
     };
+
+    const battleLobbyRefreshHandler = () => {
+        updateBattleTeam();
+
+    }
 
     useEffect(() => {
 
@@ -147,7 +153,7 @@ const BattleMode = (props) => {
 
     return (
 
-        sendingTeam === 3 ? <BattleLobby data={loadedTeam} onRefreshTeam={updateBattleTeam} />
+        sendingTeam === 3 ? <BattleLobby data={loadedTeam} onRefreshTeam={battleLobbyRefreshHandler} />
             :
             <div style={{ padding: '1rem' }}>
                 <h1>Match Prep</h1>

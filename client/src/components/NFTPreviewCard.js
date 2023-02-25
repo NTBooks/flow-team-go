@@ -57,10 +57,11 @@ const NFTPreviewCard = (props) => {
 
                     dispatch(gameActions.addNFTStats({ nftdata: TrackedNFTRequestData.nftdata }))
 
-                } else {
-                    // Doesn't exist, so stub it in so it won't repeat the request
-                    dispatch(gameActions.addNFTStats({ nftdata: { nftid: props.data.id, health: 100, level: -1, collection: props.data.collection } }))
                 }
+                // else {
+                //     // Doesn't exist, so stub it in so it won't repeat the request
+                //     dispatch(gameActions.addNFTStats({ nftdata: { nftid: props.data.id, health: 100, level: -1, collection: props.data.collection } }))
+                // }
 
 
             })();

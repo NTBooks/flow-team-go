@@ -241,7 +241,7 @@ module.exports = {
         try {
 
             const option = await db.all(
-                `SELECT collection, nftid, chain, health, level, content FROM NFTStats  WHERE collection = ? AND nftid = ? AND chain = ? LIMIT 1`
+                `SELECT id,collection, nftid, chain, health, level, content FROM NFTStats  WHERE collection = ? AND nftid = ? AND chain = ? LIMIT 1`
 
                 , [collection, nftid, chain]
             );

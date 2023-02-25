@@ -61,6 +61,8 @@ const BattleLobby = (props) => {
 
     useEffect(() => {
         updateMatchList();
+        if (props.data)
+            setBgridData(JSON.parse(BattleHeader.teamData[0].team));
 
     }, [])
 
@@ -78,6 +80,8 @@ const BattleLobby = (props) => {
 
     const [matchList, setMatchList] = useState();
     const [uploadingTeam, setUploadingTeam] = useState();
+
+    const [bgridData, setBgridData] = useState();
 
     let selectableObjects = unboundGameState.jwt ? [{
         ctrl:
@@ -119,7 +123,6 @@ const BattleLobby = (props) => {
     }];
 
     if (matchList) {
-        console.log(matchList)
         selectableObjects = [...selectableObjects, ...matchList.map(x => {
             return {
                 ctrl:
@@ -165,8 +168,15 @@ const BattleLobby = (props) => {
 
                 const fresjson = await fres.json();
 
+                //TODO: random or vs need to send stat changes
+
                 console.log("PLAYERMODE", fresjson);
                 setPlayerModeData(fresjson);
+
+                fresjson.statChanges.forEach((x) => {
+                    dispatch(gameActions.removeNFTStats({ id: x.id }));
+                })
+
 
                 break;
             case 'VS Match':
@@ -189,7 +199,7 @@ const BattleLobby = (props) => {
 
                 const fres2json = await fres2.json();
 
-                console.log("PLAYERMODE", fres2json);
+                console.log("REPLAY", fres2json);
                 setPlayerModeData(fres2json);
                 break;
             case 'Upload':
@@ -203,9 +213,9 @@ const BattleLobby = (props) => {
 
         setBattleError();
         setUploadingTeam(true);
+        setBgridData();
 
         const submitTeamResult = await fetch('/v1/submitteam/' + unboundGameState.gallery, { method: 'GET', headers: { 'authorization': unboundGameState.jwt } });
-        console.log(submitTeamResult);
 
         if (submitTeamResult.status !== 200) {
             setBattleError(submitTeamResult);
@@ -220,7 +230,8 @@ const BattleLobby = (props) => {
 
         if (resultDetail.message === 'SUCCESS') {
             setUploadingTeam(false);
-            console.log("UPL")
+            setBgridData(resultDetail.team);
+
         }
 
 
@@ -268,24 +279,13 @@ const BattleLobby = (props) => {
                                 </Row>
                                 <Row>
                                     <Col>
-                                        <BattleGrid3x2 data={JSON.parse(BattleHeader.teamData[0].team)} />
+                                        <BattleGrid3x2 data={bgridData} />
                                     </Col>
                                 </Row>
                                 <Row>
                                     <Col>{BattleHeader.teamData[0].team.userName}</Col>
                                 </Row>
-                                {enemyTeam && <>
-                                    <Row>
-                                        <Col>vs. </Col>
-                                    </Row>
-                                    <Row>
-                                        <Col>
-                                            <BattleGrid3x2 data={JSON.parse(BattleHeader.teamData[0].team)} />
-                                        </Col>
-                                    </Row>
-                                </>
 
-                                }
                                 {battleError && <Alert>{battleError}</Alert>}
                             </Container>
 
