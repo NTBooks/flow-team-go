@@ -20,7 +20,7 @@ background-size: 100% 100%;
   width: 36rem; 
   background-repeat: no-repeat;
 margin: 0.1rem auto 0.1rem auto;
-opacity: 0.8;
+opacity:1;
 `);
 
 

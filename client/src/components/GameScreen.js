@@ -47,7 +47,7 @@ height: 40rem;
 position:relative;
 background: #FDF8FE;
 color: #2F3332;
-opacity: 0.9;
+opacity: 0.95;
 margin: 2rem auto 0 auto;
 border-radius: 1rem;
 box-shadow: 0px 0px 1rem #FFFFFF;

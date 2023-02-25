@@ -533,7 +533,8 @@ app.get("/v1/getbattleteam/:gallery", async (req, res) => {
         const teamData = await db.getTeamStatus(gallery, 1);
 
         if (teamData.length < 1) {
-            throw "No team data loaded."
+            res.statusCode = 404;
+            return res.send({ message: "No team data loaded." });
         }
 
         const battleHeaders = await db.getBattleHeaders(teamData[0].id);
@@ -622,6 +623,8 @@ async function RunMatch(teamA, teamB) {
         if (HPSum(gameState.A) <= 0) {
 
             await db.setBattleWinner(battleID, false);
+
+
             // write B winnter record
             return; // don't recurse
         }
@@ -630,6 +633,14 @@ async function RunMatch(teamA, teamB) {
 
             await db.setBattleWinner(battleID, true);
             // write B winnter record
+            // Whoever is alive gets leveled up
+
+
+            ActiveATeam.filter(x => x.hp > 0).forEach(async y => {
+                await db.levelUp(y.id);
+            });
+
+
             return; // don't recurse
         }
 
@@ -748,6 +759,7 @@ async function RunMatch(teamA, teamB) {
 
     }
 
+    await db.addBattleLine(battleID, -1, -1, gameState);
     await recursiveRound(0);
 
     return battleID;
@@ -793,6 +805,125 @@ app.get("/v1/randombattle", authenticateToken, async (req, res) => {
         // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
 
         res.send({ ...fullBattle, teamAData, teamBData });
+
+    } catch (ex) {
+        res.statusCode = 500;
+        return res.send({ message: ex.message });
+
+    }
+
+});
+
+
+app.get("/v1/vsbattle/:opponent", authenticateToken, async (req, res) => {
+    try {
+
+        // TODO: Check when last battle was and make sure it's been at least 10 secs
+
+        const gallery = req.user.userName.substring(0, req.user.userName.indexOf(","));
+        const enemy = req.paramString("opponent")
+
+
+        const teamAData = await db.getTeamStatus(gallery, 1);
+
+
+        if (teamAData.length < 1) {
+            throw { message: "No team data loaded." }
+        }
+
+        const teamBData = await db.getTeamStatus(enemy, 1);
+        if (teamBData.length < 1) {
+            throw { message: "Gallery not found." }
+        }
+
+        // Run the match...
+        const result = await RunMatch(teamAData[0], teamBData[0]);
+
+
+        const fullBattle = await db.getFullBattle(result);
+
+        // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
+        // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
+
+        res.send({ ...fullBattle, teamAData, teamBData });
+
+    } catch (ex) {
+        res.statusCode = 500;
+        return res.send({ message: ex.message });
+
+    }
+
+});
+
+
+app.get("/v1/replaybattle/:id", authenticateToken, async (req, res) => {
+    try {
+
+        // TODO: Check when last battle was and make sure it's been at least 10 secs
+
+        const gallery = req.user.userName.substring(0, req.user.userName.indexOf(","));
+        const id = +req.paramString("id");
+
+
+
+        const fullBattle = await db.getFullBattle(id);
+        const teamAData = await db.getTeamSnapshot(+fullBattle.header[0].teamA);
+
+
+        if (teamAData.length < 1) {
+            throw "No team data loaded."
+        }
+        const teamBData = await db.getTeamSnapshot(+fullBattle.header[0].teamB);
+        if (teamBData.length < 1) {
+            throw "No team data loaded."
+        }
+        // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
+        // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
+
+        res.send({ ...fullBattle, teamAData, teamBData });
+
+    } catch (ex) {
+        res.statusCode = 500;
+        return res.send({ message: ex.message });
+
+    }
+
+});
+
+
+
+app.get("/v1/getmatchlist", authenticateToken, async (req, res) => {
+    try {
+
+        // TODO: Check when last battle was and make sure it's been at least 10 secs
+
+        const gallery = req.user.userName.substring(0, req.user.userName.indexOf(","));
+        // const teamAData = await db.getTeamHistory(gallery, 1);
+
+
+        // if (teamAData.length < 1) {
+        //     throw "No team data loaded."
+        // }
+
+
+        // const teamBGallery = randomTeam.userName.substring(0, randomTeam.userName.indexOf(","));
+
+        // const teamBData = await db.getTeamStatus(randomTeamGallery, 1);
+
+        // // Run the match...
+        // const result = await RunMatch(teamAData[0], teamBData[0]);
+
+
+        const battleHeaders = await db.getBattleHeaders(req.user.userName);
+
+
+
+        // const fullBattle = await db.getFullBattle(result);
+
+        // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
+        // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
+
+        res.send(battleHeaders);
 
     } catch (ex) {
         res.statusCode = 500;

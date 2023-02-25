@@ -13,7 +13,7 @@ import BattleLobby from './BattleLobby';
 
 
 
-const fadeIn = keyframes`
+const hueShift = keyframes`
   0% {
     transform: scale(.85) rotate(0);
 
@@ -34,7 +34,7 @@ const fadeIn = keyframes`
 `;
 
 const CrazyImage = styled.img`
-animation: ${fadeIn} 3s linear infinite;
+animation: ${hueShift} 3s linear infinite;
 `
 
 const BattleMode = (props) => {
@@ -43,31 +43,41 @@ const BattleMode = (props) => {
 
     const unboundGameState = useStore().getState().gamestate;
 
+    const allChecks = (unboundGameState.team_a.filter(x => !x).length === 0) &&
+        (unboundGameState.team_b.filter(x => !x).length === 0) &&
+        !unboundGameState.tempPin && (unboundGameState.jwt && unboundGameState.jwt.length > 10);
+
+
     const [sendingTeam, setSendingTeam] = useState(0);
     const [loadedTeam, setLoadedTeam] = useState();
+    const [sentTeam, setSentTeam] = useState();
 
+    const updateBattleTeam = async () => {
+        // Check for active team. Let users resubmit. Check their record.
+        const battleTeam = await fetch('/v1/getbattleteam/' + unboundGameState.gallery);
+
+        if (battleTeam.status !== 200) {
+            return;
+        }
+
+        const battleTeamData = await battleTeam.json();
+
+        console.log("BT UPDATE", battleTeamData)
+
+
+        setSendingTeam(3);
+        setLoadedTeam(battleTeamData);
+
+    };
 
     useEffect(() => {
 
-
-        (async () => {
-            // Check for active team. Let users resubmit. Check their record.
-            const battleTeam = await fetch('/v1/getbattleteam/' + unboundGameState.gallery);
-
-            if (battleTeam.status !== 200) {
-                return;
-            }
-
-            const battleTeamData = await battleTeam.json();
-
-            setSendingTeam(3);
-            setLoadedTeam(battleTeamData);
-
-        })();
+        if (allChecks || sentTeam) {
+            updateBattleTeam();
+        }
 
 
-
-    }, []);
+    }, [sentTeam]);
 
     const vsMenuHandler = async (cmd) => {
 
@@ -92,7 +102,11 @@ const BattleMode = (props) => {
                 console.log(resultDetail);
 
                 if (resultDetail.message === 'SUCCESS') {
-                    setSendingTeam(2);
+                    setTimeout(() => {
+                        setSendingTeam(2);
+                        setSentTeam(true);
+                    }, 2000);
+
                 }
                 // Success!
                 // OK so active teams are teams with A and B squads or just B squad. Some NFTs need health > 0
@@ -129,14 +143,11 @@ const BattleMode = (props) => {
 
     //http://localhost:8252/v1/submitteam/83EugeneSloths
 
-    const allChecks = (unboundGameState.team_a.filter(x => !x).length === 0) &&
-        (unboundGameState.team_b.filter(x => !x).length === 0) &&
-        !unboundGameState.tempPin && (unboundGameState.jwt && unboundGameState.jwt.length > 10);
 
 
     return (
 
-        sendingTeam === 3 ? <BattleLobby data={loadedTeam} />
+        sendingTeam === 3 ? <BattleLobby data={loadedTeam} onRefreshTeam={updateBattleTeam} />
             :
             <div style={{ padding: '1rem' }}>
                 <h1>Match Prep</h1>
@@ -164,7 +175,8 @@ const BattleMode = (props) => {
                     :
                     sendingTeam === 0 ?
 
-                        allChecks ? <SFXMenu setkey="vssfx" mainMenuHandler={vsMenuHandler} selectableObjects={selectableObjects} onCancel={() => { }} /> :
+                        allChecks ? <SFXMenu setkey="vssfx" mainMenuHandler={vsMenuHandler} selectableObjects={selectableObjects} onCancel={() => { }} />
+                            :
 
                             <Alert className={'nes-container'} style={{ width: '30rem', padding: '1rem 1rem 1rem 0', margin: '2rem auto 0 auto', textAlign: 'center' }}>
                                 Complete the items above for your team to be eligible to compete in the Cloud Arena!

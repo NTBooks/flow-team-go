@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -12,6 +12,7 @@ import BattleGrid3x2 from './BattleGrid3x2';
 import BattlePlayer from './BattlePlayer';
 import LoginModal from './LoginModal';
 import { gameActions } from '../store/gamestate';
+import GalleryEnterModal from './GalleryEnterModal';
 
 const ScrollContainer = styled.div`
 overflow-y: scroll;
@@ -31,10 +32,38 @@ color: #CC0000;
 
 `
 
+
+const NormalLabel = styled.div`
+width: 16rem;
+text-align: left;
+
+
+`
+
+
 const BattleLobby = (props) => {
     //props.data contains the battle data
     const BattleHeader = props.data;
     const dispatch = useDispatch();
+
+    const updateMatchList = async () => {
+        const fres = await fetch('/v1/getmatchlist', { method: 'GET', headers: { 'authorization': unboundGameState.jwt, 'content-type': 'application/json' } });
+        if (fres.status !== 200) {
+            setBattleError("Server error.")
+            return;
+        }
+
+        const fresjson = await fres.json();
+
+        setMatchList(fresjson);
+
+    };
+
+    useEffect(() => {
+        updateMatchList();
+
+    }, [])
+
 
     const unboundGameState = useStore().getState().gamestate;
 
@@ -45,8 +74,21 @@ const BattleLobby = (props) => {
 
     const [playerModeData, setPlayerModeData] = useState();
     const [showLogin, setShowLogin] = useState();
+    const [showGallery, setShowGallery] = useState();
 
-    const selectableObjects = [{
+    const [matchList, setMatchList] = useState();
+    const [uploadingTeam, setUploadingTeam] = useState();
+
+    let selectableObjects = unboundGameState.jwt ? [{
+        ctrl:
+            <SelectableWrapper>
+                <NormalLabel>
+                    Upload Changes
+                </NormalLabel>
+            </SelectableWrapper>,
+        val: 'Upload'
+    },
+    {
         ctrl:
             <SelectableWrapper>
                 <SystemLabel>
@@ -64,22 +106,55 @@ const BattleLobby = (props) => {
                 </SystemLabel>
             </SelectableWrapper>,
         val: 'VS Match'
+    }] : [{
+        ctrl:
+            <SelectableWrapper>
+                <SystemLabel>
+                    Unlock with PIN
+                </SystemLabel>
+
+            </SelectableWrapper>,
+        val: 'Unlock',
+
     }];
+
+    if (matchList) {
+        console.log(matchList)
+        selectableObjects = [...selectableObjects, ...matchList.map(x => {
+            return {
+                ctrl:
+                    <SelectableWrapper>
+                        <div style={{ width: '16rem', top: '1rem', position: 'relative', backgroundColor: '#CCCCCC' }}>
+                            <span style={{ fontSize: '0.5rem' }}> {(new Date(x.battleDate)).toGMTString()}</span>
+                            <br />
+                            <span style={x.winner == 1 ? { fontSize: '0.7rem', color: '#CC0000' } : { fontSize: '0.7rem' }}>{x.winner == 1 ? 'WIN' : 'LOSE'} </span><span style={{ fontSize: '0.7rem' }}>vs. {x.teamBGalleryID.split(",")[1]}</span>
+                        </div>
+
+                    </SelectableWrapper>,
+                val: 'Replay-' + x.id,
+
+            }
+        })]
+    }
+
 
     // TOOD: add list of previous matches
 
     const vsMenuHandler = async (cmd) => {
-        switch (cmd) {
-            case 'Random':
-                // Get list of battle team names
-                // You always fight enemy teams at full health
-                // Pick Random Name
-                // Get newest team for that random name and fight them
+        switch (cmd.split("-")[0]) {
+            case 'Unlock':
 
                 if (!unboundGameState.jwt) {
                     setShowLogin(true);
                     return;
                 }
+
+                break;
+            case 'Random':
+                // Get list of battle team names
+                // You always fight enemy teams at full health
+                // Pick Random Name
+                // Get newest team for that random name and fight them
 
 
                 const fres = await fetch('/v1/randombattle', { method: 'GET', headers: { 'authorization': unboundGameState.jwt, 'content-type': 'application/json' } });
@@ -95,14 +170,84 @@ const BattleLobby = (props) => {
 
                 break;
             case 'VS Match':
+                dispatch(gameActions.disableKeylisteners({ set: true }));
+                if (unboundGameState.jwt) {
+                    setShowGallery(true);
+                    return;
+                } else {
+                    setShowLogin(true);
+                    return;
+                }
+
+                break;
+            case 'Replay':
+                const fres2 = await fetch('/v1/replaybattle/' + cmd.split("-")[1], { method: 'GET', headers: { 'authorization': unboundGameState.jwt, 'content-type': 'application/json' } });
+                if (fres2.status !== 200) {
+                    setBattleError("Server error.")
+                    return;
+                }
+
+                const fres2json = await fres2.json();
+
+                console.log("PLAYERMODE", fres2json);
+                setPlayerModeData(fres2json);
+                break;
+            case 'Upload':
+                uploadTeam();
                 break;
         }
 
     };
 
+    const uploadTeam = async () => {
+
+        setBattleError();
+        setUploadingTeam(true);
+
+        const submitTeamResult = await fetch('/v1/submitteam/' + unboundGameState.gallery, { method: 'GET', headers: { 'authorization': unboundGameState.jwt } });
+        console.log(submitTeamResult);
+
+        if (submitTeamResult.status !== 200) {
+            setBattleError(submitTeamResult);
+            return;
+        }
+
+
+
+        const resultDetail = await submitTeamResult.json();
+
+
+
+        if (resultDetail.message === 'SUCCESS') {
+            setUploadingTeam(false);
+            console.log("UPL")
+        }
+
+
+    }
+
+    const closeHandler = async (galleryName) => {
+
+        setBattleError();
+
+        const fres = await fetch('/v1/vsbattle/' + galleryName, { method: 'GET', headers: { 'authorization': unboundGameState.jwt, 'content-type': 'application/json' } });
+        if (fres.status !== 200) {
+            const jsonRes = await fres.json();
+            setBattleError(jsonRes ? jsonRes.message : "Server error.")
+            return;
+        }
+
+        const fresjson = await fres.json();
+
+        setPlayerModeData(fresjson);
+
+    }
+
 
     return playerModeData ?
-        <BattlePlayer data={playerModeData} />
+        <BattlePlayer data={playerModeData} onFinished={() => {
+            setPlayerModeData(0); updateMatchList(); props.onRefreshTeam();
+        }} />
         :
         BattleHeader ?
 
@@ -114,42 +259,48 @@ const BattleLobby = (props) => {
 
                     </Col>
                 </Row>
-
-                <Row>
-                    <Col>
-                        <Container>
-                            <Row>
-                                <Col>
-                                    <BattleGrid3x2 data={JSON.parse(BattleHeader.teamData[0].team)} />
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col>{BattleHeader.teamData[0].team.userName}</Col>
-                            </Row>
-                            {enemyTeam && <>
+                {!uploadingTeam &&
+                    <Row>
+                        <Col>
+                            <Container>
                                 <Row>
-                                    <Col>vs. </Col>
+                                    <Col style={{ color: '#CC0000', textAlign: 'center', paddingTop: '1.2rem' }}>Uploaded Cloud Arena Team</Col>
                                 </Row>
                                 <Row>
                                     <Col>
                                         <BattleGrid3x2 data={JSON.parse(BattleHeader.teamData[0].team)} />
                                     </Col>
                                 </Row>
-                            </>
+                                <Row>
+                                    <Col>{BattleHeader.teamData[0].team.userName}</Col>
+                                </Row>
+                                {enemyTeam && <>
+                                    <Row>
+                                        <Col>vs. </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col>
+                                            <BattleGrid3x2 data={JSON.parse(BattleHeader.teamData[0].team)} />
+                                        </Col>
+                                    </Row>
+                                </>
 
-                            }
-                        </Container>
+                                }
+                                {battleError && <Alert>{battleError}</Alert>}
+                            </Container>
 
-                    </Col>
-                    <Col>
-                        <ScrollContainer>
+                        </Col>
+                        <Col>
+                            <ScrollContainer>
 
-                            <SFXMenu setkey="matchsfx" mainMenuHandler={vsMenuHandler} selectableObjects={selectableObjects} onCancel={() => { }} />
-                            <LoginModal show={showLogin} onClose={() => { setShowLogin(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
-                        </ScrollContainer>
+                                <SFXMenu setkey="matchsfx" mainMenuHandler={vsMenuHandler} selectableObjects={selectableObjects} onCancel={() => { }} />
+                                <LoginModal show={showLogin} onClose={() => { setShowLogin(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
+                            </ScrollContainer>
 
-                    </Col>
-                </Row>
+                        </Col>
+                    </Row>
+                }
+                <GalleryEnterModal show={showGallery} onClose={(e) => { closeHandler(e); setShowGallery(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
             </Container>
 
             : <></>;

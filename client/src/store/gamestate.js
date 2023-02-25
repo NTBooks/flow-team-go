@@ -52,7 +52,17 @@ const gameSlice = createSlice({
             state.disableKeylisteners = action.payload.set;
         },
         addNFTStats(state, action) {
-            state.nftStats = [...state.nftStats, action.payload.nftdata];
+
+            action.payload.nftdata.parsed = action.payload.nftdata.content ? JSON.parse(action.payload.nftdata.content) : null;
+
+            const foundExisting = state.nftStats.findIndex(x => x.nftid == action.payload.nftdata.nftid && x.collection == action.payload.nftdata.collection);
+
+            if (foundExisting > -1) {
+                state.nftStats[foundExisting] = action.payload.nftdata;
+            }
+            else {
+                state.nftStats = [...state.nftStats, action.payload.nftdata];
+            }
         },
         addToTeam(state, action) {
             // TODO: write add to team logic

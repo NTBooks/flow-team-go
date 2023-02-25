@@ -185,6 +185,32 @@ module.exports = {
             console.error(dbError);
         }
     },
+    getTeamSnapshot: async (id) => {
+        try {
+            const option = await db.all(
+                `SELECT * FROM Team WHERE id = ? ORDER BY id DESC LIMIT 1
+              `
+                , [id]
+            );
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+    getTeamHistory: async (username, battlemode = 0) => {
+        try {
+            const option = await db.all(
+                `SELECT * FROM Team WHERE battlemode = ${battlemode} AND userName like ?||',%' ORDER BY id DESC
+              `
+                , [username]
+            );
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
     updateTeam: async (username, team, battleMode) => {
         try {
 
@@ -218,6 +244,22 @@ module.exports = {
                 `SELECT collection, nftid, chain, health, level, content FROM NFTStats  WHERE collection = ? AND nftid = ? AND chain = ? LIMIT 1`
 
                 , [collection, nftid, chain]
+            );
+
+
+            return option;
+        } catch (dbError) {
+            console.error(dbError);
+        }
+    },
+
+    levelUp: async (id) => {
+        try {
+
+            const option = await db.all(
+                `UPDATE NFTStats SET level  = level +1 WHERE id = ?`
+
+                , [id]
             );
 
 
@@ -288,7 +330,7 @@ module.exports = {
 
 
             const option = await db.all(
-                `SELECT * FROM BattleHeader WHERE teamAGalleryID = ? OR teamBGalleryID = ?
+                `SELECT * FROM BattleHeader WHERE teamAGalleryID = ? OR teamBGalleryID = ? ORDER BY id DESC LIMIT 20 
               `
 
                 , [gallery, gallery]

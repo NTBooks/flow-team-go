@@ -225,11 +225,11 @@ const Intro = (props) => {
     const selectableObjects = lastCreatedAddress ? [
         { ctrl: <SelectableWrapper> NEW TEAM </SelectableWrapper>, val: 'NEW GAME' },
         { ctrl: <SelectableWrapper> CONTINUE </SelectableWrapper>, val: 'CONTINUE' },
-        { ctrl: <SelectableWrapper> DEMO  </SelectableWrapper>, val: '/demo' }
+        // { ctrl: <SelectableWrapper> DEMO  </SelectableWrapper>, val: '/demo' }
 
     ] : [
         { ctrl: <SelectableWrapper> NEW TEAM </SelectableWrapper>, val: 'NEW GAME' },
-        { ctrl: <SelectableWrapper> DEMO  </SelectableWrapper>, val: '/demo' }
+        // { ctrl: <SelectableWrapper> DEMO  </SelectableWrapper>, val: '/demo' }
 
     ];
 

@@ -15,40 +15,42 @@ const GalleryEnterModal = (props) => {
     const gallery = `${unboundGameState.gallery},${unboundGameState.galleryName}`;
 
     const [galleryName, setGalleryName] = useState("");
-    const [loginError, setLoginError] = useState();
+    const [galleryError, setGalleryError] = useState();
 
     const handleClose = async () => {
-        props.onClose();
+        props.onClose(null);
     }
 
     const handleGallerySubmit = async (e) => {
         e.preventDefault();
         // Perform some action with the password
 
-        setLoginError();
+        setGalleryError();
 
 
-        const fres = await fetch('/v1/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ gallery: gallery, pin: loginPassword }) });
-        if (fres.status !== 200) {
-            setLoginError("Server error.")
-            return;
-        }
+        props.onClose(galleryName);
 
-        const fresjson = await fres.json();
+        // const fres = await fetch('/v1/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ gallery: gallery, pin: loginPassword }) });
+        // if (fres.status !== 200) {
+        //     setLoginError("Server error.")
+        //     return;
+        // }
 
-        if (fresjson?.token) {
-            dispatch(gameActions.setJwt({ jwt: `BEARER ${fresjson?.token}`, setPin: false }));
+        // const fresjson = await fres.json();
 
-            localStorage.setItem("token_" + gallery, fresjson?.token);
+        // if (fresjson?.token) {
+        //     dispatch(gameActions.setJwt({ jwt: `BEARER ${fresjson?.token}`, setPin: false }));
 
-            localStorage.setItem("gogallery", gallery);
+        //     localStorage.setItem("token_" + gallery, fresjson?.token);
 
-            handleClose();
+        //     localStorage.setItem("gogallery", gallery);
 
-        } else {
+        //     handleClose();
 
-            setLoginError(fresjson.message);
-        }
+        // } else {
+
+        //     setLoginError(fresjson.message);
+        // }
 
 
 
@@ -60,11 +62,11 @@ const GalleryEnterModal = (props) => {
         <Modal.Body>
             <Form onSubmit={handleGallerySubmit}>
                 <Form.Group>
-                    <Form.Label>Enter Team Name ([YY][City][Animal])</Form.Label>
+                    <Form.Label>Enter Team Name<br />([YY][City][Animal])</Form.Label>
                     <InputGroup className="mb-3">
                         <Form.Control
                             type="text"
-                            value={loginPassword}
+                            value={galleryName}
                             onChange={(e) => setGalleryName(e.target.value)}
                             pattern='^\d\d[A-Za-z]{8,}$'
                             required
@@ -75,6 +77,7 @@ const GalleryEnterModal = (props) => {
 
                     </InputGroup>
                     {galleryError && <Alert variant='danger' style={{ marginTop: '2rem' }}>{galleryError}</Alert>}
+                    <p>ex. 84TampaLions</p>
                 </Form.Group>
 
             </Form>

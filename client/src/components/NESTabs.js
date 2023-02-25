@@ -44,6 +44,7 @@ position:absolute;
 right:1rem;
 padding-top:0.7rem;
 font-size: 0.7rem;
+top: 0.5rem;
 color:#fff1e8;
 text-shadow: 0.1rem 0.1rem 0.1rem #111111;
 `;
