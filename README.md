@@ -2,18 +2,24 @@
 
 Repo for Flow hackathon 2023
 
-To prepart your environment:
+To prepare your environment:
 
 Run "npm install --force" from both the client and server folders.
 Add a .env to your server folder. It should contain the following:
+
+```txt
 TOKEN_SECRET=YOURSECRETGOESHERE
 PORT=8252
 SESSION_MINS=300
+```
 
 Add a .env to the client folder also with the following:
+
+```txt
 IMAGE_RESIZER="https://wsrv.nl/?url=%URL%&w=%WIDTH%"
 PRIVATE_GATEWAY=YOUR PRIVATE FILEBASE IPFS GATEWAY
 IMAGE_RESIZER_BYPASS="imgur"
+```
 
 To run the development version:
 
