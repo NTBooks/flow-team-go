@@ -3,11 +3,9 @@ const path = require("path");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
-//#region data sources
 const db = require("./sqlite_db");
 const fs = require("fs");
-var JSZip = require('jszip');
-//#endregion
+const JSZip = require('jszip');
 const fcl = require("@onflow/fcl");
 
 fcl.config()
@@ -27,25 +25,6 @@ function generateAccessToken(data, customExpire = null) {
         throw { message: "Data must be an object." };
     return jwt.sign(data, process.env.TOKEN_SECRET, { expiresIn: customExpire ? customExpire : (+process.env.SESSION_MINS) + 'm' });
 }
-
-const hiLoCodes = [
-    "Top",
-    "Bottom"
-]
-
-const attributeCodes = [
-    'Current HP', // Reserved for round 4+
-    'Smash', // Low Smash is 50%, high smash is 100%
-    'ID',
-    'Level',
-    'Description Length',
-    'Description Alphabetical',
-    'Name Length',
-    'Name Alphabetical',
-    'Collection Name Length',
-    'Collection Name Alphabetical',
-    'Doppleganger' // Special
-]
 
 
 function authenticateToken(req, res, next) {
@@ -85,12 +64,7 @@ require("dotenv").config({ path: '.env' });
 const env = process.env.NODE_ENV || "development";
 const app = express();
 
-
 app.use(bodyParser.json({ limit: '2mb' }));
-
-
-const port =
-    env === "development" ? process.env.DEV_PORT : process.env.PROD_PORT;
 
 app.use(require("sanitize").middleware);
 
@@ -111,10 +85,9 @@ app.get("/v1/connect", async (req, res) => {
     return res.send({ token, expires, secret });
 });
 
-
 app.post("/v1/create", authenticateToken, async (req, res) => {
     try {
-        // User wishes to set a pin
+
         const userName = req.bodyString("name");
         const userWallet = req.bodyString("wallet").toLowerCase();
         const tempPin = req.bodyString("pin");
@@ -130,8 +103,6 @@ app.post("/v1/create", authenticateToken, async (req, res) => {
 
         if (/^0x[0-9a-fA-F]{16}$/.test(userWallet) || /.+\.find$/.test(userWallet)) {
 
-
-
             const resolvedWallet = userWallet.indexOf('.find') > 0 ? await fcl.query({
                 cadence: find.networks.mainnet.scripts.getStatus.code,
                 args: (arg, t) => [
@@ -142,12 +113,9 @@ app.post("/v1/create", authenticateToken, async (req, res) => {
 
             const NFTWallets = resolvedWallet ? resolvedWallet.FINDReport.accounts.map(x => x.address) : [userWallet];
 
-
             await asyncForEach(NFTWallets, async (wallet_addr) => {
                 await db.linkWallet(userName, wallet_addr, userWallet, 'FLOW');
             });
-
-
 
         } else {
             throw { message: "Wallet address invalid." };
@@ -165,7 +133,6 @@ app.post("/v1/create", authenticateToken, async (req, res) => {
         return res.send({ message: ex.message });
     }
 });
-
 
 app.post("/v1/changepin", authenticateToken, async (req, res) => {
     try {
@@ -216,7 +183,6 @@ app.post("/v1/login", async (req, res) => {
             return res.send({ message: "Login Incorrect", name: userName })
         }
 
-
         return res.send({ message: "SUCCESS", name: userName, token: generateAccessToken({ userName }) });
 
     } catch (ex) {
@@ -224,7 +190,6 @@ app.post("/v1/login", async (req, res) => {
         return res.send({ message: ex.message });
     }
 });
-
 
 app.post("/v1/checktoken", authenticateToken, async (req, res) => {
     try {
@@ -262,16 +227,12 @@ app.post("/v1/updateteam", authenticateToken, async (req, res) => {
                 throw { message: "data corrupt" };
             }
 
-
             return { collection: x.collection, id: +x.id }
         })
 
         // Team should be an array of 6 {id, collection}
-
         await db.updateTeam(req.user.userName, cleanedTeam, false);
 
-
-        // Send a fresh token
         res.send({ message: "SUCCESS" });
 
     } catch (ex) {
@@ -284,7 +245,6 @@ app.post("/v1/updateteam", authenticateToken, async (req, res) => {
 var catalogSizeCache = null;
 
 async function cacheCollectionCt() {
-
 
     if (!catalogSizeCache) {
         catalogSizeCache = await fcl.query({
@@ -305,7 +265,7 @@ async function walletCache(alias, catalogSize, wallet) {
     let cache_served = false;
     const cacheFile = `.tmp/${alias}.zip`;
 
-    // Delete old cache data
+    // Delete old cache data older than 1 hour
     try {
         if (fs.existsSync(cacheFile)) {
             if ((new Date()) - fs.statSync(cacheFile).mtime > 60 * 1000 * 60)
@@ -322,37 +282,19 @@ async function walletCache(alias, catalogSize, wallet) {
 
         const fileData = await JSZip.loadAsync(fdata);
         const unzippedFileData = await fileData.files["nfts.txt"].async('string');
-        //console.log(fileData) // These are your file contents   
+
         NFTList = JSON.parse(unzippedFileData);
         cache_served = true;
-
-        // TODO: Check file data
-        // For now, delete the file after 5 mins just in case it's old. Cron would be better for cleaning this dir but it's overkill
-
-        // console.log("Cache queued for deletion.", new Date());
-        // setTimeout(() => {
-        //     try {
-        //         console.log("Attempt unlink.", new Date());
-        //         // delete the file after 5 mins
-        //         if (fs.existsSync(cacheFile)) {
-
-        //             fs.unlinkSync(cacheFile);
-        //         }
-        //     } catch {
-        //         console.log("Failed to delete cache file.");
-        //     }
-        // }, 60 * 1000 * 5);
-
 
     }
     else {
         const catalogCount = +catalogSize;
+
+        // TODO: move to .env
         const PAGESIZE = 15;
         const PAGES = (catalogCount / PAGESIZE) + 1;
 
         const NFTWallets = wallet.map(x => x.address);
-
-
 
         await asyncForEach(NFTWallets, async linkedwallet => {
 
@@ -380,13 +322,9 @@ async function walletCache(alias, catalogSize, wallet) {
                 catch (ex) {
                     console.log(ex);
                 }
-                //console.log(response);
             }
 
         });
-
-
-
 
         zip.file("nfts.txt", JSON.stringify(NFTList));
 
@@ -394,13 +332,11 @@ async function walletCache(alias, catalogSize, wallet) {
             .generateNodeStream({ type: 'nodebuffer', streamFiles: true, compression: "DEFLATE" })
             .pipe(fs.createWriteStream(cacheFile))
             .on('finish', function () {
-                // JSZip generates a readable stream with a "end" event,
-                // but is piped here in a writable stream which emits a "finish" event.
                 console.log(cacheFile + " written.");
 
                 setTimeout(() => {
                     try {
-                        // delete the file after 5 mins
+                        // delete the file after 60 mins
                         if (fs.existsSync(cacheFile))
                             fs.unlinkSync(cacheFile);
                     } catch {
@@ -408,8 +344,6 @@ async function walletCache(alias, catalogSize, wallet) {
                     }
                 }, 60 * 1000 * 60);
             });
-
-
 
     }
 
@@ -421,24 +355,16 @@ app.get("/v1/galleryexists/:gallery", async (req, res) => {
     try {
         const gallery = req.paramString("gallery");
         res.send(await db.checkName(gallery));
-
     } catch (ex) {
         res.statusCode = 403;
         return res.send(ex.message ? { message: ex.message } : { message: ex });
-
     }
 });
 
 app.get("/v1/getgallery/:gallery", async (req, res) => {
     try {
-
-        // TODO: if we want to do battles this has to happen at the server but we can always cache it
-        // TODO: Add a sqlite table for wallet caches that live at least 5 mins
-
+        // If we want to do battles this has to happen at the server but we can always cache it
         const gallery = req.paramString("gallery");
-        const mode = req.queryString("view") == true;
-
-        // TODO: Get user customizations too
 
         // get user's NFTs
         const wallet = await db.getWallet(gallery);
@@ -473,16 +399,10 @@ app.get("/v1/getgallery/:gallery", async (req, res) => {
 });
 
 
-
-
-// TODO: add authentication
 app.get("/v1/submitteam/:gallery", authenticateToken, async (req, res) => {
     try {
-
-
         const gallery = req.paramString("gallery");
 
-        // get user's NFTs
         const wallet = await db.getWallet(gallery);
 
         const teamData = await db.getTeamStatus(gallery);
@@ -503,8 +423,6 @@ app.get("/v1/submitteam/:gallery", authenticateToken, async (req, res) => {
             return { ...NFTList[teammember.collection]?.find(x => x.id == teammember.id), collectionID: teammember.collection }
         }) : [];
 
-
-
         await asyncForEach(relevantTeamNFTs, async (nftdata) => {
             // Insert each NFT data from the team if it doesn't exist
             await db.addTrackedNFT(nftdata.collectionID, nftdata.id, JSON.stringify(nftdata), 'FLOW');
@@ -520,7 +438,6 @@ app.get("/v1/submitteam/:gallery", authenticateToken, async (req, res) => {
     } catch (ex) {
         res.statusCode = 403;
         return res.send({ message: ex.message });
-
     }
 });
 
@@ -530,18 +447,13 @@ app.get("/v1/nft/:collection/:nftid", async (req, res) => {
 
         const collection = req.paramString("collection");
         const nftid = req.paramString("nftid");
-
-        // get user's NFTs
         const nftdata = await db.getTrackedNFT(collection, nftid, 'FLOW');
-
-
 
         res.send({ nftdata: nftdata.length === 1 ? nftdata[0] : null });
 
     } catch (ex) {
         res.statusCode = 403;
         return res.send({ message: ex.message });
-
     }
 });
 
@@ -573,22 +485,29 @@ app.get("/v1/getbattleteam/:gallery", async (req, res) => {
 });
 
 async function RunMatch(teamA, teamB) {
-    // Get the data for the relevant NFTs
-    // Get the stats data for those NFTs
-
-    // Set initial conditions
-
     // Run rounds of (random attribute), (up or down or middle)
-    // Create deltas and update in memory stats
-    // Swap in B team
     // Add winner record once one team is KOed 
+
+    const attributeCodes = [
+        'Current HP', // Reserved for round 4+
+        'Smash', // Low Smash is 50%, high smash is 100%
+        'ID',
+        'Level',
+        'Description Length',
+        'Description Alphabetical',
+        'Name Length',
+        'Name Alphabetical',
+        'Collection Name Length',
+        'Collection Name Alphabetical',
+        'Doppleganger' // Special
+    ]
+
+
 
     const teamAData = JSON.parse(teamA.team);
     const teamBData = JSON.parse(teamB.team);
 
     const matchCache = await db.getMatchData([...teamAData, ...teamBData]);
-
-
 
     // A tream starts at their loaded health
     // B team starts full
@@ -601,9 +520,6 @@ async function RunMatch(teamA, teamB) {
 
     // Mirror match means we KO one copy of each at random
     // Then there is the fight
-    // TODO: Sees their doppleganger... but there can be only one! We are NON-FUNGIBLE!
-    // TODO: I found the imposter!
-
     const battleID = await db.createNewBattle(teamA.id, teamB.id, teamA.userName, teamB.userName);
 
     const dopplegangerList = gameState.A.filter(x => gameState.B.find(y => y.id === x.id));
@@ -611,7 +527,6 @@ async function RunMatch(teamA, teamB) {
     const hiLo = () => {
         return Math.floor(Math.random() * 2);
     }
-
 
     while (dopplegangerList.length > 0) {
         const dupe = dopplegangerList.pop();
@@ -627,7 +542,6 @@ async function RunMatch(teamA, teamB) {
         await db.addBattleLine(battleID, attributeCodes.indexOf('Doppleganger'), hiLoRoll, gameState);
 
     }
-
 
     const HPSum = (list) => {
         if (list.length == 0)
@@ -648,24 +562,17 @@ async function RunMatch(teamA, teamB) {
         if (HPSum(gameState.A) <= 0) {
 
             await db.setBattleWinner(battleID, false);
-
-
-            // write B winnter record
             return; // don't recurse
         }
 
         if (HPSum(gameState.B) <= 0) {
-
             await db.setBattleWinner(battleID, true);
-            // write B winnter record
+
             // Whoever is alive gets leveled up
-
-
             ActiveATeam.filter(x => x.hp > 0).forEach(async y => {
                 await db.levelUp(y.id);
                 statChanges.push({ id: y.id });
             });
-
 
             return; // don't recurse
         }
@@ -690,18 +597,15 @@ async function RunMatch(teamA, teamB) {
 
         switch (attributeCodes[attributeRoll]) {
             case 'Current HP':
-
                 const HPHit = hiLoRoll != 0 ?
                     Math.max(...aggregateList.map(x => x.hp))
                     : Math.min(...aggregateList.map(x => x.hp));
 
                 aggregateList.filter(x => x.hp === HPHit).forEach(x => x.hp -= hitStrength);
-
                 break;
             case 'Smash':
                 const randomSelection = aggregateList[Math.floor(Math.random() * aggregateList.length)];
                 randomSelection.hp -= hiLoRoll * 50 + 50; // 50 or 100 damage
-
                 break;
             case 'ID':
                 const IDHit = hiLoRoll != 0 ?
@@ -709,16 +613,13 @@ async function RunMatch(teamA, teamB) {
                     : Math.min(...expandedAggregateList.map(x => x.data.nftid));
 
                 expandedAggregateList.filter(x => x.data.nftid === IDHit).forEach(x => x.objref.hp -= hitStrength);
-
                 break;
             case 'Level':
-
                 const LevelHit = hiLoRoll != 0 ?
                     Math.max(...expandedAggregateList.map(x => x.level))
                     : Math.min(...expandedAggregateList.map(x => x.level));
 
                 expandedAggregateList.filter(x => x.level === LevelHit).forEach(x => x.objref.hp -= hitStrength);
-
                 break;
             case 'Description Length':
                 const DescLenHit = hiLoRoll != 0 ?
@@ -726,7 +627,6 @@ async function RunMatch(teamA, teamB) {
                     : Math.min(...expandedAggregateList.map(x => x.data.description.length));
 
                 expandedAggregateList.filter(x => x.data.description.length === DescLenHit).forEach(x => x.objref.hp -= hitStrength);
-
                 break;
             case 'Description Alphabetical':
                 const sortedListD = expandedAggregateList.sort((a, b) => {
@@ -734,15 +634,12 @@ async function RunMatch(teamA, teamB) {
 
                 });
                 const objToChangeD = sortedListD[hiLoRoll == 0 ? 0 : sortedListD.length - 1].objref;
-
                 objToChangeD.hp -= hitStrength;
             case 'Name Length':
                 const NameLenHit = hiLoRoll != 0 ?
                     Math.max(...expandedAggregateList.map(x => x.data.name.length))
                     : Math.min(...expandedAggregateList.map(x => x.data.name.length));
-
                 expandedAggregateList.filter(x => x.data.name.length === NameLenHit).forEach(x => x.objref.hp -= hitStrength);
-
                 break;
             case 'Name Alphabetical':
                 const sortedListN = expandedAggregateList.sort((a, b) => {
@@ -750,17 +647,13 @@ async function RunMatch(teamA, teamB) {
 
                 });
                 const objToChangeN = sortedListN[hiLoRoll == 0 ? 0 : sortedListN.length - 1].objref;
-
-
                 objToChangeN.hp -= hitStrength;
                 break;
             case 'Collection Name Length':
                 const CollLenHit = hiLoRoll != 0 ?
                     Math.max(...expandedAggregateList.map(x => x.data.collectionName.length))
                     : Math.min(...expandedAggregateList.map(x => x.data.collectionName.length));
-
                 expandedAggregateList.filter(x => x.data.collectionName.length === CollLenHit).forEach(x => x.objref.hp -= hitStrength);
-
                 break;
             case 'Collection Name Alphabetical':
                 const sortedListC = expandedAggregateList.sort((a, b) => {
@@ -768,7 +661,6 @@ async function RunMatch(teamA, teamB) {
 
                 });
                 const objToChange = sortedListC[hiLoRoll == 0 ? 0 : sortedListC.length - 1].objref;
-
                 objToChange.hp -= hitStrength;
                 break;
             default:
@@ -781,8 +673,6 @@ async function RunMatch(teamA, teamB) {
         await db.addBattleLine(battleID, attributeRoll, hiLoRoll, gameState);
 
         await recursiveRound(rnd + 1);
-
-
     }
 
     await db.addBattleLine(battleID, -1, -1, gameState);
@@ -798,15 +688,11 @@ app.get("/v1/randombattle", authenticateToken, async (req, res) => {
     try {
 
         // TODO: Check when last battle was and make sure it's been at least 10 secs
-
         const gallery = req.user.userName.substring(0, req.user.userName.indexOf(","));
 
-        // get user's NFTs
         const eligibleTeams = await db.getBattleTeamList(0);
 
-
         const teamAData = await db.getTeamStatus(gallery, 1);
-
 
         if (teamAData.length < 1) {
             throw "No team data loaded."
@@ -823,12 +709,7 @@ app.get("/v1/randombattle", authenticateToken, async (req, res) => {
 
         // Run the match...
         const result = await RunMatch(teamAData[0], teamBData[0]);
-
-
         const fullBattle = await db.getFullBattle(result[0]);
-
-        // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
-        // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
 
         res.send({ ...fullBattle, teamAData, teamBData, statChanges: result[1] });
 
@@ -852,7 +733,6 @@ app.get("/v1/vsbattle/:opponent", authenticateToken, async (req, res) => {
 
         const teamAData = await db.getTeamStatus(gallery, 1);
 
-
         if (teamAData.length < 1) {
             throw { message: "No team data loaded." }
         }
@@ -862,21 +742,15 @@ app.get("/v1/vsbattle/:opponent", authenticateToken, async (req, res) => {
             throw { message: "Gallery not found." }
         }
 
-        // Run the match...
         const result = await RunMatch(teamAData[0], teamBData[0]);
 
-
         const fullBattle = await db.getFullBattle(result[0]);
-
-        // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
-        // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
 
         res.send({ ...fullBattle, teamAData, teamBData, statChanges: result[1] });
 
     } catch (ex) {
         res.statusCode = 500;
         return res.send({ message: ex.message });
-
     }
 
 });
@@ -885,16 +759,11 @@ app.get("/v1/vsbattle/:opponent", authenticateToken, async (req, res) => {
 app.get("/v1/replaybattle/:id", authenticateToken, async (req, res) => {
     try {
 
-        // TODO: Check when last battle was and make sure it's been at least 10 secs
-
         const gallery = req.user.userName.substring(0, req.user.userName.indexOf(","));
         const id = +req.paramString("id");
 
-
-
         const fullBattle = await db.getFullBattle(id);
         const teamAData = await db.getTeamSnapshot(+fullBattle.header[0].teamA);
-
 
         if (teamAData.length < 1) {
             throw "No team data loaded."
@@ -903,17 +772,13 @@ app.get("/v1/replaybattle/:id", authenticateToken, async (req, res) => {
         if (teamBData.length < 1) {
             throw "No team data loaded."
         }
-        // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
-        // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
 
         res.send({ ...fullBattle, teamAData, teamBData });
 
     } catch (ex) {
         res.statusCode = 500;
         return res.send({ message: ex.message });
-
     }
-
 });
 
 
@@ -921,47 +786,15 @@ app.get("/v1/replaybattle/:id", authenticateToken, async (req, res) => {
 app.get("/v1/getmatchlist", authenticateToken, async (req, res) => {
     try {
 
-        // TODO: Check when last battle was and make sure it's been at least 10 secs
-
-        const gallery = req.user.userName.substring(0, req.user.userName.indexOf(","));
-        // const teamAData = await db.getTeamHistory(gallery, 1);
-
-
-        // if (teamAData.length < 1) {
-        //     throw "No team data loaded."
-        // }
-
-
-        // const teamBGallery = randomTeam.userName.substring(0, randomTeam.userName.indexOf(","));
-
-        // const teamBData = await db.getTeamStatus(randomTeamGallery, 1);
-
-        // // Run the match...
-        // const result = await RunMatch(teamAData[0], teamBData[0]);
-
-
         const battleHeaders = await db.getBattleHeaders(req.user.userName);
-
-
-
-        // const fullBattle = await db.getFullBattle(result);
-
-        // const battleAHeaders = await db.getBattleHeaders(teamAData[0].id);
-        // const battleBHeaders = await db.getBattleHeaders(teamBData[0].id);
-
         res.send(battleHeaders);
 
     } catch (ex) {
         res.statusCode = 500;
         return res.send({ message: ex.message });
-
     }
 
 });
-
-
-//getTeamStatus
-
 
 // Serve react frontend
 const buildPath = path.normalize(path.join(__dirname, '../client/dist'));
@@ -972,7 +805,7 @@ rootRouter.get('(/*)?', async (req, res, next) => {
     try {
 
         if (req.url.indexOf("/g/") > -1) {
-            // console.log("Sending modified file");
+
             const fileContents = fs.readFileSync(path.join(buildPath, 'index.html'), 'utf8');
 
             // TODO: make better previews
@@ -1004,6 +837,3 @@ app.use(rootRouter);
 app.listen(process.env.PORT, "0.0.0.0", () => {
     console.log(`Listening to requests on http://localhost:${process.env.PORT}`);
 });
-
-// NOTE: To run the server on a droplet install pm2 and then run: pm2 start "npm run start"
-// NOTE: install cloudflared on the server

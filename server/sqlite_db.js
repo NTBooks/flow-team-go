@@ -1,9 +1,3 @@
-/**
- * Module handles database management
- *
- * Server API calls the methods in here to query and update the SQLite database
- */
-
 const fs = require("fs");
 const dbFile = "./.data/flowdb.db";
 const exists = fs.existsSync(dbFile);
@@ -43,7 +37,6 @@ dbWrapper
                     "CREATE TABLE NFTStats (id INTEGER PRIMARY KEY AUTOINCREMENT, collection TEXT, nftid INT, chain TEXT, health INT, level INT, content TEXT)"
                 );
 
-                // Store copies of the team composition
                 await db.run(
                     "CREATE TABLE BattleHeader (id INTEGER PRIMARY KEY AUTOINCREMENT, teamA TEXT, teamB TEXT, teamAGalleryID TEXT, teamBGalleryID TEXT, battleDate DATETIME, viewed INT, winner TEXT)"
                 );
@@ -101,14 +94,12 @@ module.exports = {
     checkName: async (name) => {
         try {
 
-
             if (name.length < 8) {
                 throw "Name too short";
             }
             const exists = await db.get(
                 "SELECT userName from Users WHERE userName like ?||',%'", [name]
             );
-
 
             return exists;
         } catch (dbError) {
@@ -124,9 +115,7 @@ module.exports = {
             );
 
             if (exists) {
-
                 return bcrypt.compareSync(pin, exists.pin) ? "SUCCESS" : "FAIL"; // true
-
             }
 
             return 'FAIL';
@@ -152,7 +141,6 @@ module.exports = {
     getWallet: async (username) => {
         try {
             return await db.all("SELECT address, chain, alias FROM Wallets WHERE userName like ?||',%'", [username]);
-
         } catch (dbError) {
             console.error(dbError);
         }
@@ -168,7 +156,6 @@ module.exports = {
 
                 , [username, address, alias, chain, username, address, chain, alias]
             );
-
 
             return option;
         } catch (dbError) {
@@ -264,7 +251,6 @@ module.exports = {
                 , [collection, nftid, chain]
             );
 
-
             return option;
         } catch (dbError) {
             console.error(dbError);
@@ -279,7 +265,6 @@ module.exports = {
 
                 , [id]
             );
-
 
             return option;
         } catch (dbError) {
@@ -298,7 +283,6 @@ module.exports = {
                 , [collection, nftid, chain, content, collection, nftid, chain]
             );
 
-
             return option;
         } catch (dbError) {
             console.error(dbError);
@@ -306,8 +290,6 @@ module.exports = {
     },
     createNewBattle: async (teamA, teamB, teamAName, teamBName) => {
         try {
-
-
 
             const option = await db.get(
                 `INSERT INTO BattleHeader (teamA, teamB, teamAGalleryID, teamBGalleryID, battleDate, viewed) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 0);`
@@ -317,8 +299,6 @@ module.exports = {
 
             const inserted = await db.get(
                 `SELECT last_insert_rowid() as rowID`
-
-
             );
 
             return inserted.rowID;
@@ -329,13 +309,9 @@ module.exports = {
     getMatchData: async (NFTList) => {
         try {
 
-            // We have list of collection and id, want to get list of NFT Stats and NFT Data per those lists
-            // SELECT Collection then INNER JOIN the ID
-
             const qry = `SELECT * FROM NFTStats WHERE nftid||':'||collection IN (${NFTList.map(x => `'${x.id}:${x.collection}'`).join(',')})`;
 
-            const option = await db.all(qry
-            );
+            const option = await db.all(qry);
 
             return option;
         } catch (dbError) {
@@ -345,12 +321,9 @@ module.exports = {
     getBattleHeaders: async (gallery) => {
         try {
 
-
-
             const option = await db.all(
                 `SELECT * FROM BattleHeader WHERE teamAGalleryID = ? OR teamBGalleryID = ? ORDER BY id DESC LIMIT 20 
               `
-
                 , [gallery, gallery]
             );
 
@@ -362,12 +335,9 @@ module.exports = {
     setBattleViewed: async (id) => {
         try {
 
-
-
             const option = await db.all(
                 `UPDATE BattleHeader SET viewed = true WHERE id = ?
               `
-
                 , [id]
             );
 
@@ -379,12 +349,9 @@ module.exports = {
     setBattleWinner: async (id, ownerWon) => {
         try {
 
-
-
             const option = await db.all(
                 `UPDATE BattleHeader SET winner = ? WHERE id = ?
               `
-
                 , [ownerWon, id]
             );
 
@@ -395,13 +362,9 @@ module.exports = {
     },
     addBattleLine: async (headerID, statRoll, hiLoRoll, statDeltas) => {
         try {
-
-            // Use special statRoll for end of battle
-
             const option = await db.all(
                 `INSERT INTO BattleLine (headerID, statRoll, highestLowestRoll, idStatsDeltas) VALUES (?, ?, ?, ?)
               `
-
                 , [headerID, statRoll, hiLoRoll, JSON.stringify(statDeltas)]
             );
             return option;
@@ -414,28 +377,24 @@ module.exports = {
             const option = await db.all(
                 `SELECT DISTINCT userName FROM Team WHERE id > ${newerThanID} AND battlemode = 1 ORDER BY id DESC LIMIT 1000
               `
-
             );
 
             return option;
         } catch (dbError) {
             console.error(dbError);
         }
-
     },
     getFullBattle: async (battleID) => {
         try {
             const header = await db.all(
                 `SELECT * FROM BattleHeader WHERE id = ?
           `
-
                 , [battleID]
             );
 
             const lines = await db.all(
                 `SELECT * FROM BattleLine WHERE headerID = ?
           `
-
                 , [battleID]
             );
             return { header, lines };
@@ -445,8 +404,4 @@ module.exports = {
         }
 
     }
-
-    // INT, StatRoll INT, HighestLowestRoll INT, IDStatsList TEXT
-
-
 };
