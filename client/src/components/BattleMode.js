@@ -147,9 +147,6 @@ const BattleMode = (props) => {
     const checkMark = <img src={require('../../public/Checkmark.png')} style={{ imageRendering: 'pixelated', height: '4rem', position: 'relative', top: '-1.2rem' }} />;
     const xMark = <img src={require('../../public/XIcon.png')} style={{ imageRendering: 'pixelated', height: '4rem', position: 'relative', top: '-1.2rem' }} />;
 
-    //http://localhost:8252/v1/submitteam/83EugeneSloths
-
-
 
     return (
 
@@ -168,7 +165,7 @@ const BattleMode = (props) => {
                     </Row>
                     <Row>
                         <Col xs={2}>{unboundGameState.tempPin ? xMark : checkMark}</Col>
-                        <Col>PIN Set</Col>
+                        <Col>PIN Set (Options)</Col>
                     </Row>
                     <Row>
                         <Col xs={2}>{unboundGameState.jwt && unboundGameState.jwt.length > 10 ? checkMark : xMark}</Col>

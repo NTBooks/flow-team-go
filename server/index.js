@@ -355,25 +355,34 @@ async function walletCache(alias, catalogSize, wallet) {
 
 
         await asyncForEach(NFTWallets, async linkedwallet => {
+
             for (var i = 0; i < PAGES; i++) {
-                const response = await fcl.query({
-                    cadence: fs.readFileSync("cadence/get_all_nfts_in_account.cdc", "utf-8"),
-                    args: (arg, t) => [
-                        arg(linkedwallet, t.Address),
-                        arg(`${PAGESIZE}`, t.Int),
-                        arg(`${i}`, t.Int)
-                    ],
-                });
-                for (let [key, value] of Object.entries(response)) {
-                    if (NFTList[key] === undefined && value && value.length > 0) {
-                        NFTList[key] = [];
+
+                try {
+                    const response = await fcl.query({
+                        cadence: fs.readFileSync("cadence/get_all_nfts_in_account.cdc", "utf-8"),
+                        args: (arg, t) => [
+                            arg(linkedwallet, t.Address),
+                            arg(`${PAGESIZE}`, t.Int),
+                            arg(`${i}`, t.Int)
+                        ],
+                    });
+
+                    for (let [key, value] of Object.entries(response)) {
+                        if (NFTList[key] === undefined && value && value.length > 0) {
+                            NFTList[key] = [];
+                        }
+                        if (value && value.length > 0) {
+                            NFTList[key] = [...NFTList[key], ...value];
+                        }
                     }
-                    if (value && value.length > 0) {
-                        NFTList[key] = [...NFTList[key], ...value];
-                    }
+                }
+                catch (ex) {
+                    console.log(ex);
                 }
                 //console.log(response);
             }
+
         });
 
 

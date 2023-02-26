@@ -108,7 +108,7 @@ const OptionsPane = (props) => {
 
     if (JWT) {
         selectableObjects2.push({
-            ctrl: <SelectableWrapper key={'pin'} style={{ paddingTop: '1rem', color: "#0000cc" }}> <OptionsLabel style={{ position: 'relative', top: '0.4rem' }}> Change PIN </OptionsLabel>
+            ctrl: <SelectableWrapper key={'pin'} style={{ paddingTop: '1rem', color: "#0000cc" }}> <OptionsLabel style={{ position: 'relative', top: '0.4rem' }}> Set PIN </OptionsLabel>
 
             </SelectableWrapper>, val: 'Set Pin'
         })
