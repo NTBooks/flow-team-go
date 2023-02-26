@@ -8,6 +8,9 @@ https://www.youtube.com/watch?v=cnIjVhgkbYY
 Try the live demo while it's up:
 https://flowteamgo.waxworks.io/
 
+SLIDE DECK HERE:
+https://waxworks.io/wp-content/uploads/2023/02/Flow-Team-Go.pdf
+
 # Want to run your own copy?
 
 To prepare your environment:
