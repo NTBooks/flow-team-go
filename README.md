@@ -2,6 +2,9 @@
 
 Repo for Flow hackathon 2023
 
+See the game!
+https://www.youtube.com/watch?v=cnIjVhgkbYY
+
 Try the live demo while it's up:
 https://flowteamgo.waxworks.io/
 
