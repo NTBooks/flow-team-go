@@ -1,15 +1,19 @@
+![Alt text](https://waxworks.io/wp-content/uploads/2023/02/Cover3.jpg "Flow Team Go! NFT Battle Arena")
+
 # flow-team-go
 
 Repo for Flow hackathon 2023
 
-See the game!
+## SLIDE DECK HERE:
+https://waxworks.io/wp-content/uploads/2023/02/Flow-Team-Go.pdf
+
+## See the game!
 https://www.youtube.com/watch?v=cnIjVhgkbYY
 
-Try the live demo while it's up:
+## Try it out!
 https://flowteamgo.waxworks.io/
 
-SLIDE DECK HERE:
-https://waxworks.io/wp-content/uploads/2023/02/Flow-Team-Go.pdf
+
 
 # Want to run your own copy?
 
