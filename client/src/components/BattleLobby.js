@@ -61,8 +61,21 @@ const BattleLobby = (props) => {
 
     useEffect(() => {
         updateMatchList();
-        if (props.data)
-            setBgridData(JSON.parse(BattleHeader.teamData[0].team));
+        if (props.data) {
+            const headerData = JSON.parse(BattleHeader.teamData[0].team);
+            setBgridData(headerData);
+
+            let matches = true;
+            const stateVal = [...unboundGameState.team_a, ...unboundGameState.team_b];
+            headerData.forEach((x, i) => {
+                if (x.id != stateVal[i].id || x.collection != stateVal[i].collection) {
+                    console.log("MISMATCH", x);
+                    matches = false;
+                }
+            })
+            setBgridDataMatches(matches);
+        }
+
 
     }, [])
 
@@ -82,6 +95,7 @@ const BattleLobby = (props) => {
     const [uploadingTeam, setUploadingTeam] = useState();
 
     const [bgridData, setBgridData] = useState();
+    const [bgridDataMatches, setBgridDataMatches] = useState();
 
     let selectableObjects = unboundGameState.jwt ? [{
         ctrl:
@@ -121,6 +135,10 @@ const BattleLobby = (props) => {
         val: 'Unlock',
 
     }];
+
+    if (bgridDataMatches) {
+        selectableObjects = [...selectableObjects.filter(x => x.val !== 'Upload')]
+    }
 
     if (matchList) {
         selectableObjects = [...selectableObjects, ...matchList.map(x => {
@@ -215,6 +233,8 @@ const BattleLobby = (props) => {
         setUploadingTeam(true);
         setBgridData();
 
+
+
         const submitTeamResult = await fetch('/v1/submitteam/' + unboundGameState.gallery, { method: 'GET', headers: { 'authorization': unboundGameState.jwt } });
 
         if (submitTeamResult.status !== 200) {
@@ -226,13 +246,27 @@ const BattleLobby = (props) => {
 
         const resultDetail = await submitTeamResult.json();
 
-
+        console.log("BLAH", JSON.stringify(resultDetail.team), JSON.stringify([...unboundGameState.team_a, ...unboundGameState.team_b]));
 
         if (resultDetail.message === 'SUCCESS') {
             setUploadingTeam(false);
             setBgridData(resultDetail.team);
 
         }
+
+        let matches = true;
+        const stateVal = [...unboundGameState.team_a, ...unboundGameState.team_b];
+        resultDetail.team.forEach((x, i) => {
+            if (x.id != stateVal[i].id || x.collection != stateVal[i].collection) {
+                console.log("MISMATCH", x);
+                matches = false;
+            }
+        })
+
+
+        setBgridDataMatches(matches);
+
+
 
 
     }
