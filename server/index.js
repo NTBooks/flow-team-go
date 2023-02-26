@@ -140,7 +140,7 @@ app.post("/v1/create", authenticateToken, async (req, res) => {
                 ],
             }) : null;
 
-            const NFTWallets = resolvedWallet ? resolvedWallet.FINDReport.accounts.map(x => x.address) : [wallet_addr];
+            const NFTWallets = resolvedWallet ? resolvedWallet.FINDReport.accounts.map(x => x.address) : [userWallet];
 
 
             await asyncForEach(NFTWallets, async (wallet_addr) => {

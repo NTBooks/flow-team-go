@@ -14,6 +14,7 @@ import FormControl from 'react-bootstrap/FormControl';
 import LoadWallet from './LoadWallet';
 import uuid from 'react-native-uuid';
 import { gameActions } from '../store/gamestate';
+import GalleryEnterModal from './GalleryEnterModal';
 
 
 // todo: right and left arrows navigate pages
@@ -72,6 +73,8 @@ const Intro = (props) => {
     const [lastCreatedAddress, setLastCreatedAddress] = useState("");
 
     const [show, setShow] = useState(false);
+    const [showGallery, setShowGallery] = useState();
+    const [showGalleryError, setShowGalleryError] = useState();
 
     const handleClose = () => {
         setShow(false);
@@ -149,6 +152,23 @@ const Intro = (props) => {
 
     };
 
+    const loadHandler = async (galleryName) => {
+        if (galleryName) {
+            setShowGalleryError();
+            const galleryExists = await fetch('/v1/getgallery/' + galleryName);
+            if (galleryExists.status === 403) {
+                setShowGalleryError("Team does not exist.");
+                return;
+            }
+
+
+
+
+            dispatch(gameActions.setUserWallet({ gallery: galleryName, galleryName: 'FIX' }));
+            navigate(`/${galleryName}/a_team`);
+
+        }
+    }
 
     const mainMenuHandler = (action) => {
 
@@ -168,6 +188,10 @@ const Intro = (props) => {
                 setShow(true);
 
 
+            }
+            if (action === 'LOAD') {
+                dispatch(gameActions.disableKeylisteners({ set: true }));
+                setShowGallery(true);
             }
 
             if (action === 'CONTINUE') {
@@ -225,17 +249,20 @@ const Intro = (props) => {
     const selectableObjects = lastCreatedAddress ? [
         { ctrl: <SelectableWrapper> NEW TEAM </SelectableWrapper>, val: 'NEW GAME' },
         { ctrl: <SelectableWrapper> CONTINUE </SelectableWrapper>, val: 'CONTINUE' },
+        { ctrl: <SelectableWrapper> LOAD </SelectableWrapper>, val: 'LOAD' }
         // { ctrl: <SelectableWrapper> DEMO  </SelectableWrapper>, val: '/demo' }
 
     ] : [
         { ctrl: <SelectableWrapper> NEW TEAM </SelectableWrapper>, val: 'NEW GAME' },
+        { ctrl: <SelectableWrapper> LOAD </SelectableWrapper>, val: 'LOAD' },
         // { ctrl: <SelectableWrapper> DEMO  </SelectableWrapper>, val: '/demo' }
 
     ];
 
     return <><FadeContainer style={{ opacity: exiting ? 0 : 1 }}>
         <TitleImage />
-        <TopContainer><FlexItem>2023 Nick Tantillo<br />released under MIT license.</FlexItem></TopContainer>
+        <TopContainer> {showGalleryError ? <FlexItem> <Alert>{showGalleryError}</Alert></FlexItem> : <FlexItem>2023 Nick Tantillo<br />released under MIT license.</FlexItem>}</TopContainer>
+
         <SFXMenu setkey="mmsfx" mainMenuHandler={mainMenuHandler} selectableObjects={selectableObjects} exiting={exiting} />
 
 
@@ -291,6 +318,7 @@ const Intro = (props) => {
                 </Modal.Footer>
             }
         </Modal>
+        <GalleryEnterModal show={showGallery} onClose={(e) => { loadHandler(e); setShowGallery(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
 
     </>;
 
