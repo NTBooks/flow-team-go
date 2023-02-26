@@ -407,6 +407,19 @@ async function walletCache(alias, catalogSize, wallet) {
     return { cache_served, NFTList };
 }
 
+
+app.get("/v1/galleryexists/:gallery", async (req, res) => {
+    try {
+        const gallery = req.paramString("gallery");
+        res.send(await db.checkName(gallery));
+
+    } catch (ex) {
+        res.statusCode = 403;
+        return res.send(ex.message ? { message: ex.message } : { message: ex });
+
+    }
+});
+
 app.get("/v1/getgallery/:gallery", async (req, res) => {
     try {
 

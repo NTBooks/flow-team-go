@@ -155,16 +155,18 @@ const Intro = (props) => {
     const loadHandler = async (galleryName) => {
         if (galleryName) {
             setShowGalleryError();
-            const galleryExists = await fetch('/v1/getgallery/' + galleryName);
+            const galleryExists = await fetch('/v1/galleryexists/' + galleryName);
             if (galleryExists.status === 403) {
                 setShowGalleryError("Team does not exist.");
                 return;
             }
 
+            const galleryData = await galleryExists.json();
+            const galleryParts = galleryData.userName.split(",");
+            localStorage.setItem("gogallery", galleryData);
 
 
-
-            dispatch(gameActions.setUserWallet({ gallery: galleryName, galleryName: 'FIX' }));
+            dispatch(gameActions.setUserWallet({ gallery: galleryParts[0], galleryName: galleryParts[1], jwt: '' }));
             navigate(`/${galleryName}/a_team`);
 
         }

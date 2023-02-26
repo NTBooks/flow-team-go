@@ -98,6 +98,24 @@ module.exports = {
             return dbError;
         }
     },
+    checkName: async (name) => {
+        try {
+
+
+            if (name.length < 8) {
+                throw "Name too short";
+            }
+            const exists = await db.get(
+                "SELECT userName from Users WHERE userName like ?||',%'", [name]
+            );
+
+
+            return exists;
+        } catch (dbError) {
+            console.error(dbError);
+            return dbError;
+        }
+    },
     login: async (name, pin) => {
         try {
 
