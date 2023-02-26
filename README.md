@@ -2,6 +2,9 @@
 
 # flow-team-go
 
+Build teams from ANY Flow NFTs then battle them with your friend in the Cloud Arena!
+Want to discover new collections or new opponents? Choose a random matchup!
+
 Repo for Flow hackathon 2023
 
 ## SLIDE DECK HERE:
