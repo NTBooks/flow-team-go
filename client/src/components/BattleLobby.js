@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import Alert from 'react-bootstrap/Alert';
+import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import SFXMenu from './SFXMenu';
-import SelectableWrapper from './SelectableWrapper';
 import { useDispatch, useStore } from 'react-redux';
-import styled, { keyframes } from 'styled-components';
-import Alert from 'react-bootstrap/Alert';
-import { Spinner } from 'react-bootstrap';
+import styled from 'styled-components';
+import { gameActions } from '../store/gamestate';
 import BattleGrid3x2 from './BattleGrid3x2';
 import BattlePlayer from './BattlePlayer';
-import LoginModal from './LoginModal';
-import { gameActions } from '../store/gamestate';
 import GalleryEnterModal from './GalleryEnterModal';
+import LoginModal from './LoginModal';
+import SelectableWrapper from './SelectableWrapper';
+import SFXMenu from './SFXMenu';
 
 const ScrollContainer = styled.div`
 overflow-y: scroll;
@@ -21,25 +20,18 @@ width:100%;
 height:31rem;
 margin-top:1rem;
 margin-left:-1rem;
-
 `;
-
 
 const SystemLabel = styled.div`
 width: 16rem;
 text-align: left;
 color: #CC0000;
-
 `
-
 
 const NormalLabel = styled.div`
 width: 16rem;
 text-align: left;
-
-
 `
-
 
 const BattleLobby = (props) => {
     //props.data contains the battle data
@@ -54,9 +46,7 @@ const BattleLobby = (props) => {
         }
 
         const fresjson = await fres.json();
-
         setMatchList(fresjson);
-
     };
 
     useEffect(() => {
@@ -75,15 +65,10 @@ const BattleLobby = (props) => {
             })
             setBgridDataMatches(matches);
         }
-
-
     }, [])
 
 
     const unboundGameState = useStore().getState().gamestate;
-
-    const [enemyTeam, setEnemyTeam] = useState();
-    const [enemyTeamName, setEnemyTeamName] = useState();
 
     const [battleError, setBattleError] = useState();
 
@@ -158,9 +143,6 @@ const BattleLobby = (props) => {
         })]
     }
 
-
-    // TOOD: add list of previous matches
-
     const vsMenuHandler = async (cmd) => {
         switch (cmd.split("-")[0]) {
             case 'Unlock':
@@ -172,11 +154,6 @@ const BattleLobby = (props) => {
 
                 break;
             case 'Random':
-                // Get list of battle team names
-                // You always fight enemy teams at full health
-                // Pick Random Name
-                // Get newest team for that random name and fight them
-
 
                 const fres = await fetch('/v1/randombattle', { method: 'GET', headers: { 'authorization': unboundGameState.jwt, 'content-type': 'application/json' } });
                 if (fres.status !== 200) {
@@ -186,16 +163,12 @@ const BattleLobby = (props) => {
 
                 const fresjson = await fres.json();
 
-                //TODO: random or vs need to send stat changes
-
                 console.log("PLAYERMODE", fresjson);
                 setPlayerModeData(fresjson);
 
                 fresjson.statChanges.forEach((x) => {
                     dispatch(gameActions.removeNFTStats({ id: x.id }));
                 })
-
-
                 break;
             case 'VS Match':
                 dispatch(gameActions.disableKeylisteners({ set: true }));
@@ -206,7 +179,6 @@ const BattleLobby = (props) => {
                     setShowLogin(true);
                     return;
                 }
-
                 break;
             case 'Replay':
                 const fres2 = await fetch('/v1/replaybattle/' + cmd.split("-")[1], { method: 'GET', headers: { 'authorization': unboundGameState.jwt, 'content-type': 'application/json' } });
@@ -233,16 +205,12 @@ const BattleLobby = (props) => {
         setUploadingTeam(true);
         setBgridData();
 
-
-
         const submitTeamResult = await fetch('/v1/submitteam/' + unboundGameState.gallery, { method: 'GET', headers: { 'authorization': unboundGameState.jwt } });
 
         if (submitTeamResult.status !== 200) {
             setBattleError(submitTeamResult);
             return;
         }
-
-
 
         const resultDetail = await submitTeamResult.json();
 
@@ -263,12 +231,7 @@ const BattleLobby = (props) => {
             }
         })
 
-
         setBgridDataMatches(matches);
-
-
-
-
     }
 
     const closeHandler = async (galleryName) => {
@@ -285,7 +248,6 @@ const BattleLobby = (props) => {
         const fresjson = await fres.json();
 
         setPlayerModeData(fresjson);
-
     }
 
 
@@ -338,8 +300,6 @@ const BattleLobby = (props) => {
             </Container>
 
             : <></>;
-
-
 };
 
 export default BattleLobby;

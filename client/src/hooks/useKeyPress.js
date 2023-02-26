@@ -1,5 +1,5 @@
 /* Adapted from: https://stackoverflow.com/questions/42036865/react-how-to-navigate-through-list-by-arrow-keys */
-import React, { cloneElement, useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 const useKeyPress = function (targetKey) {
@@ -15,7 +15,6 @@ const useKeyPress = function (targetKey) {
             if (e.key === targetKey) {
                 e.preventDefault();
                 setKeyPressed(true);
-                console.log("KEY PRESSED", e.key, disableKeylisteners)
             }
 
         }
@@ -28,31 +27,24 @@ const useKeyPress = function (targetKey) {
                 e.preventDefault();
                 setKeyPressed(false);
             }
-
         };
 
         function fakeHandler(e) {
 
             if (e.key === targetKey) {
                 setKeyPressed(true);
-
             }
 
             // Add a fake delay
             setTimeout(() => {
                 if (e.key === targetKey) {
                     setKeyPressed(false);
-
                 }
             }, 10);
-
-
         }
 
         window.addEventListener("keydown", downHandler);
         window.addEventListener("keyup", upHandler);
-
-
 
         document.addEventListener("fakekeypress", fakeHandler);
 

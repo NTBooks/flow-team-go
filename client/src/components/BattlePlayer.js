@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import SFXMenu from './SFXMenu';
-import SelectableWrapper from './SelectableWrapper';
 import { useStore } from 'react-redux';
-import styled, { keyframes } from 'styled-components';
-import Alert from 'react-bootstrap/Alert';
-import { Spinner } from 'react-bootstrap';
-import BattleGrid3x2 from './BattleGrid3x2';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import BattleGrid3x2 from './BattleGrid3x2';
+import SelectableWrapper from './SelectableWrapper';
+import SFXMenu from './SFXMenu';
 
 const ScrollContainer = styled.div`
 overflow-y: scroll;
@@ -18,22 +16,17 @@ width:100%;
 height:31rem;
 margin-top:1rem;
 margin-left:-1rem;
-
 `;
-
 
 const SystemLabel = styled.div`
 width: 16rem;
 text-align: left;
 color: #CC0000;
-
-
 `
 
 const NormalLabel = styled.div`
 width: 16rem;
 text-align: left;
-
 `
 
 const Stat = styled.span`
@@ -55,11 +48,9 @@ font-size:1.2em;
 const BattlePlayer = (props) => {
     //props.data contains the battle data
     const BattleData = props.data;
-    const navigate = useNavigate();
 
     const homeTeam = props.data?.header[0]?.teamAGalleryID;
     const awayTeam = props.data?.header[0]?.teamBGalleryID;
-
 
     const homeTeamName = props.data?.teamAData[0].userName.split(",")[1];
     const awayTeamName = props.data?.teamBData[0].userName.split(",")[1];
@@ -71,24 +62,15 @@ const BattlePlayer = (props) => {
 
     const unboundGameState = useStore().getState().gamestate;
 
-
-    const [battleError, setBattleError] = useState();
-
     const [currLine, setCurrLine] = useState(0);
     const [currLineText, setCurrLineText] = useState();
 
     const [homeTeamRoundData, setHomeTeamRoundData] = useState();
     const [awayTeamRoundData, setAwayTeamRoundData] = useState();
-    const [homeTeamRoundDataPrev, setHomeTeamRoundDataPrev] = useState();
-    const [awayTeamRoundDataPrev, setAwayTeamRoundDataPrev] = useState();
-
-
 
     useEffect(() => {
         if (!BattleData)
             return;
-
-
 
         if (+currLine >= BattleData.lines.length) {
             const compose = composeLine(-2, 0, homeTeamRoundData, awayTeamRoundData, null);
@@ -96,32 +78,18 @@ const BattlePlayer = (props) => {
             return;
         }
 
-
-
-
         const currLineContent = BattleData.lines[currLine];
         const currDeltas = JSON.parse(currLineContent.idStatsDeltas);
 
-        setHomeTeamRoundDataPrev(homeTeamRoundData);
-        setAwayTeamRoundDataPrev(awayTeamRoundData);
-
         setHomeTeamRoundData(currDeltas.A);
         setAwayTeamRoundData(currDeltas.B);
-        // overlay
 
-
-
-        console.log("CURR LINE", homeTeamData, currDeltas);
         if (currLineContent) {
             const compose = composeLine(currLineContent.statRoll, currLineContent.highestLowestRoll, homeTeamRoundData, awayTeamRoundData, currDeltas);
-
             setCurrLineText(compose);
-            // Use idStatsDeltas to set all healthbars
         }
 
-
     }, [currLine]);
-
 
     const selectableObjects = [{
         ctrl:
@@ -132,7 +100,6 @@ const BattlePlayer = (props) => {
 
             </SelectableWrapper>,
         val: 'Next',
-
     },
     {
         ctrl:
@@ -144,12 +111,9 @@ const BattlePlayer = (props) => {
 
             </SelectableWrapper>,
         val: 'Skip',
-
     }];
 
-
     const composeLine = (statRoll, hiLo, homePrev, awayPrev, currDeltas) => {
-
         const attributeCodes = [
             'Current HP!', // Reserved for round 4+
             'Smash!', // Low Smash is 50%, high smash is 100%
@@ -171,7 +135,6 @@ const BattlePlayer = (props) => {
             homePrev?.forEach((prev, i) => {
                 if (prev.hp != currDeltas.A[i].hp) {
                     changedIndexes.push({ team: 'A', index: i, hp: currDeltas.A[i].hp });
-
                 }
 
             });
@@ -179,14 +142,12 @@ const BattlePlayer = (props) => {
             awayPrev?.forEach((prev, i) => {
                 if (prev.hp != currDeltas.B[i].hp) {
                     changedIndexes.push({ team: 'B', index: i, hp: currDeltas.B[i].hp });
-
                 }
 
             });
         }
 
         let retVal = (<p>
-
             {statRoll === -2 && homeTeamRoundData && awayTeamRoundData &&
                 <><p>Ump signals <Stat>match complete!</Stat></p>
                     <p style={{ fontSize: '3rem' }}>
@@ -208,7 +169,6 @@ const BattlePlayer = (props) => {
                         :
                         <>B Team found the imposter!</>
                     }
-
                 </>}
             {statRoll > 1 && statRoll < 10 && <><p>Ump pulls out the flags.</p>
                 <p>The {hiLo === 0 ? <Low>LOWEST</Low> : <High>HIGEST</High>} <Stat>{attributeCodes[statRoll]}</Stat> get hit!</p></>}
@@ -223,10 +183,8 @@ const BattlePlayer = (props) => {
                 }
             </>}
             {changedIndexes.map(x => {
-
                 const teamData = x.team === 'A' ? homeTeamData : awayTeamData;
                 const nameFinder = unboundGameState.nftStats.find(y => y.nftid == teamData[x.index].id && y.collection == teamData[x.index].collection);
-
 
                 return <p style={x.hp > 0 ? {} : { animation: `hueshiftcss 2s linear infinite` }}><span style={x.team === 'A' ? { color: '#CCCC00' } : { color: '#00CCCC' }}>Team {x.team}'s </span>
                     {nameFinder?.parsed?.name ? nameFinder.parsed.name : "Member " + (x.index + 1)}
@@ -234,46 +192,27 @@ const BattlePlayer = (props) => {
                         ` is hit!` :
                         ` KO'd!`
                     }
-
                 </p>
             })}
-
-
         </p>);
 
         return retVal;
-
     }
-
-
-
-
-    // TOOD: add list of previous matches
 
     const vsMenuHandler = async (cmd) => {
         switch (cmd) {
             case 'Next':
-
                 setCurrLine(Math.min(+currLine + 1, BattleData.lines.length));
-
 
                 if (currLine === BattleData.lines.length) {
                     props.onFinished();
-
                 }
-
-
                 break;
             case 'Skip':
                 props.onFinished();
                 break;
-
         }
-
     };
-
-
-    console.log("PLAYER", BattleData);
 
     return props.data ?
         <Container>
@@ -284,7 +223,6 @@ const BattlePlayer = (props) => {
 
                 </Col>
             </Row>
-
             <Row>
                 <Col>
                     <Container>
@@ -301,27 +239,18 @@ const BattlePlayer = (props) => {
                                 <BattleGrid3x2 data={awayTeamData} hp={awayTeamRoundData} />
                             </Col>
                         </Row>
-
-
-
                     </Container>
-
                 </Col>
                 <Col>
                     <ScrollContainer>
                         <h2>ROUND  {currLine + 1}</h2>
                         {currLineText}
                         <SFXMenu setkey="matchsfx" mainMenuHandler={vsMenuHandler} selectableObjects={selectableObjects} onCancel={() => { }} />
-
                     </ScrollContainer>
-
                 </Col>
             </Row>
         </Container>
-
         : <></>;
-
-
 };
 
 export default BattlePlayer;

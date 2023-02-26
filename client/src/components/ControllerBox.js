@@ -1,6 +1,5 @@
 import React from 'react';
-import styled, { keyframes } from 'styled-components';
-
+import styled from 'styled-components';
 
 const ControllerPanel = styled.div`
 position: relative;
@@ -16,7 +15,6 @@ top: 10%;
 margin-left: 10%;
 opacity: 0.8;
 position: absolute;
-
 background-image: url(${require('../../public/ControllerCross.svg')});
 `
 
@@ -27,7 +25,6 @@ top: 50%;
 left: 60%;
 opacity: 0.8;
 position: absolute;
-
 background-image: url(${require('../../public/CircleButton.svg')});
 `
 
@@ -38,7 +35,6 @@ top: 20%;
 left: 80%;
 opacity: 0.8;
 position: absolute;
-
 background-image: url(${require('../../public/CircleButton.svg')});
 `
 
@@ -81,27 +77,16 @@ position: absolute;
 background-color: pink;
 `
 
-
-
-
 const ControllerBox = () => {
-
     const simulateKey = (key) => {
-        // window.dispatchEvent(new KeyboardEvent('keydown', { 'key': key }));
-        // window.dispatchEvent(new KeyboardEvent('keyup', { 'key': key }));
-
         var evt = document.createEvent("Event");
         evt.initEvent("fakekeypress", true, true);
         evt.key = key;
-
         document.dispatchEvent(evt);
-
-        console.log(key);
     }
 
     return <ControllerPanel className="controllerbox">
         <ControllerCross>
-
             <ControllerUpButton onClick={(e) => { simulateKey('ArrowUp') }} />
             <ControllerDownButton onClick={(e) => { simulateKey('ArrowDown') }} />
             <ControllerLeftButton onClick={(e) => { simulateKey('ArrowLeft') }} />
@@ -109,9 +94,7 @@ const ControllerBox = () => {
         </ControllerCross>
         <ControllerAButton onClick={(e) => { simulateKey('a') }} />
         <ControllerBButton onClick={(e) => { simulateKey('b') }} />
-
-    </ControllerPanel>;
-
+    </ControllerPanel>
 }
 
 export default ControllerBox;

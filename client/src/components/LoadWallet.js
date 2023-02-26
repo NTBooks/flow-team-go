@@ -1,5 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Form, FormControl, Button, InputGroup } from 'react-bootstrap';
+import React, { useEffect, useRef, useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import FormControl from 'react-bootstrap/FormControl';
+import InputGroup from 'react-bootstrap/InputGroup';
 
 const LoadWallet = (props) => {
 

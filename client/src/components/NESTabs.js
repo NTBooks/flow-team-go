@@ -1,10 +1,5 @@
 import React from 'react';
-import styled, { keyframes } from 'styled-components';
-import { useSelector } from 'react-redux';
-import useAudio from '../hooks/useAudio';
-// TODO: Animate X position when changing
-import { useDispatch } from 'react-redux';
-
+import styled from 'styled-components';
 
 const OverlapTabContainer = styled.div`
 position: relative;
@@ -74,8 +69,6 @@ const NESTabs = (props) => {
     const collapsedOpt = <CollapseImage src={require("../../public/Wrench.png")}></CollapseImage>;
     const collapsedVS = <CollapseImage src={require("../../public/GearButton.png")}></CollapseImage>;
 
-    console.log(currTab);
-
     return <OverlapTabContainer>
         <RText onClick={(e) => { props.setTab(4) }}>PAGE<RTextImage src={require("../../public/SmControllerRight.png")}></RTextImage></RText>
         <OverlapTab onClick={(e) => { props.setTab(3) }} style={{ left: '9rem' }} width={currTab < 5 ? '24rem' : '2rem'} color="#212529">{currTab == 4 ? 'Options' : ''}{collapsedOpt}<StubImage src={require("../../public/TabStubSlate.png")}></StubImage></OverlapTab>
@@ -84,7 +77,6 @@ const NESTabs = (props) => {
         <OverlapTab onClick={(e) => { props.setTab(0) }} width={currTab == 1 ? '14rem' : '2rem'} color="#E76E55">{currTab == 1 ? 'Champs' : ''
         }{collapsedA}<StubImage src={require("../../public/TabStubR.png")}></StubImage></OverlapTab>
     </OverlapTabContainer >
-
 }
 
 export default NESTabs;

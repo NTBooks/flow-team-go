@@ -1,11 +1,11 @@
 
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import styled, { keyframes } from 'styled-components';
+import useAudio from "../hooks/useAudio";
 import useKeyPress from "../hooks/useKeyPress";
 import NESTabs from "./NESTabs";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
-import useAudio from "../hooks/useAudio";
-import styled, { keyframes } from 'styled-components';
 
 const fadeIn = keyframes`
   from {
@@ -66,9 +66,7 @@ const GameScreen = (props) => {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-
   const SFXState = useSelector(state => state.gamestate.sfx_toggle);
-
 
   const pageTurn = useAudio([require('url:../../public/sfx/PageTurn.wav')], false)[2];
 
@@ -108,7 +106,6 @@ const GameScreen = (props) => {
       {props.children}
     </Fade>
   </OuterBezel>;
-
 }
 
 export default React.memo(GameScreen);

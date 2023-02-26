@@ -1,4 +1,4 @@
-// Note: This is using private resources. You'll need to get your own gateway if you want to do server side resizes.
+// Note: This is using private filebase gateway. You'll need to get your own gateway if you want to do server side resizes.
 // The MIT license does not entitle you to use any server resouces in any other projects.
 
 import React, { useState } from 'react';
@@ -19,8 +19,6 @@ const GatewayImage = (props) => {
 
     let bypass = false;
 
-    // TODO: Add a pref for image bypass
-
     imageResizerBypass.forEach(x => {
         if (props.src.indexOf(x) > -1) {
             bypass = true;
@@ -31,9 +29,6 @@ const GatewayImage = (props) => {
         bypass ? props.src : process.env.IMAGE_RESIZER.replace('%URL%', encodeURIComponent(props.src)).replace("%WIDTH%", props.maxWidth);
 
     return <img src={imgError ? require('../../public/GoLogoPNG.png') : newSrc} style={props.style} onError={errorHandler} />;
-
-
-
 }
 
 export default React.memo(GatewayImage);

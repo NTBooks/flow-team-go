@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 import useAudio from '../hooks/useAudio';
 import useKeyPress from '../hooks/useKeyPress';
-import styled from 'styled-components';
 
 const FlexItem = React.memo(styled.div`
-
   width: 100%;
   min-height: 2rem;
   text-align: center;
 `);
 
 const SFXMenu = (props) => {
-
     const selectableObjects = props.selectableObjects;
     const mainMenuHandler = props.mainMenuHandler;
     const exiting = props.exiting;
@@ -32,7 +30,6 @@ const SFXMenu = (props) => {
     const spacePress = useKeyPress("Space");
 
     useEffect(() => {
-
         if (!exiting && selectableObjects.length && upPress) {
             if (SFXState && selectedIndex > 0)
                 blip();
@@ -47,7 +44,6 @@ const SFXMenu = (props) => {
                 blip();
             setSelectedIndex(prevState => prevState < selectableObjects.length - 1 ? prevState + 1 : prevState);
             document.getElementById("flex" + (selectedIndex - 1))?.scrollIntoView();
-
         }
     }, [downPress]);
 
@@ -57,16 +53,12 @@ const SFXMenu = (props) => {
                 huzuh();
 
             mainMenuHandler(selectableObjects[selectedIndex].val);
-            //setSelectedIndex(prevState => prevState < selectableObjects.length - 1 ? prevState + 1 : prevState);
         }
     }, [aPress, enterPress, spacePress]);
 
     useEffect(() => {
-
         if (!exiting && bPress) {
-
             cancel();
-            //setSelectedIndex(prevState => prevState < selectableObjects.length - 1 ? prevState + 1 : prevState);
 
             if (props.onCancel) {
                 props.onCancel();
@@ -75,20 +67,14 @@ const SFXMenu = (props) => {
     }, [bPress]);
 
     const retVal = selectableObjects.map((x, i) => {
-
         const onCl = (e) => { console.log(i); setSelectedIndex(+i) };
         if (selectedIndex == i)
             return <FlexItem style={selectableObjects[i].ctrl.props.style} key={(props.setkey ? props.setkey : 'flex') + i} id={'flex' + i}>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, isSelected: true, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</FlexItem>;
 
         return <FlexItem style={selectableObjects[i].ctrl.props.style} key={(props.setkey ? props.setkey : 'flex') + i} id={'flex' + i}>{React.cloneElement(selectableObjects[i].ctrl, { key: 'menu' + i, onClick: (e) => { onCl(); mainMenuHandler(selectableObjects[i].val); } })}</FlexItem>;
-
     });
 
-
-
     return <> {retVal}</>;
-
-
 }
 
 export default React.memo(SFXMenu);

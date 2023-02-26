@@ -71,10 +71,6 @@ const gameSlice = createSlice({
 
         },
         addToTeam(state, action) {
-            // TODO: write add to team logic
-            // Needs Team (A or B)
-            // Needs slot (0-2)
-
             const arg = { collection: action.payload.collection, id: action.payload.nftid };
 
             if (action.payload.team === 'A') {
@@ -86,17 +82,10 @@ const gameSlice = createSlice({
             }
         },
         toggleBGM(state, action) {
-            // TODO: write logic to turn BGM on or off
-
             state.bgm_toggle = action.payload.set;
         },
         toggleSFX(state, action) {
-            // TODO: write logic to turn SFX on or off
             state.sfx_toggle = action.payload.set;
-        },
-        loadDBState(state, action) {
-            // TODO: accept state config that might be requested from a website
-
         },
         setNetwork(state, action) {
             state.network = action.payload.network;
@@ -110,8 +99,6 @@ const gameSlice = createSlice({
                 state.tempPin = action.payload.tempPin;
             }
         }
-
-
     },
 });
 

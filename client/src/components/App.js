@@ -1,17 +1,16 @@
 
-import Layout from "./Layout";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
-import GameScreen from "./GameScreen";
-import ComponentTester from "./ComponentTester";
-import TeamPane from "./TeamPane";
-import OptionsPane from "./OptionsPane";
-import Intro from "./Intro";
-import AudioPlayer from "./AudioPlayer";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AboutPane from "./AboutPane";
-import styled from "styled-components";
-import GalleryLoader from "./GalleryLoader";
+import AudioPlayer from "./AudioPlayer";
 import BattleMode from "./BattleMode";
+import ComponentTester from "./ComponentTester";
+import GalleryLoader from "./GalleryLoader";
+import GameScreen from "./GameScreen";
+import Intro from "./Intro";
+import Layout from "./Layout";
+import OptionsPane from "./OptionsPane";
+import TeamPane from "./TeamPane";
 
 const router = createBrowserRouter([
     {
@@ -46,10 +45,6 @@ const router = createBrowserRouter([
         path: "/about",
         element: <><GameScreen><AboutPane /></GameScreen></>,
     },
-
-    // TODO: routes for /g/gallery/a_team
-    // TODO: routes for /g/gallery/b_team
-    // TODO: routes for /options
 
 ]);
 

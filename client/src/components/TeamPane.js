@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import NFTPlacholderCard from './NFTPlaceholderCard';
-import SFXMenu from './SFXMenu';
-import SelectableWrapper from './SelectableWrapper';
-import { useDispatch, useSelector, useStore } from 'react-redux';
-import Card from 'react-bootstrap/Card';
+import React, { useEffect, useState } from 'react';
 import AnimatedText from 'react-animated-text-content';
-import SelectNFTPane from './SelectNFTPane';
+import { useDispatch, useSelector, useStore } from 'react-redux';
+import styled from 'styled-components';
 import { gameActions } from '../store/gamestate';
-import NFTPreviewCard from './NFTPreviewCard';
 import LoginModal from './LoginModal';
-
+import NFTPlacholderCard from './NFTPlaceholderCard';
+import NFTPreviewCard from './NFTPreviewCard';
+import SelectableWrapper from './SelectableWrapper';
+import SelectNFTPane from './SelectNFTPane';
+import SFXMenu from './SFXMenu';
+import Card from 'react-bootstrap/Card';
 
 const PixelContainer = React.memo(styled.div`
 background-image: URL('${require('../../public/PixelFrame.png')}');
@@ -23,7 +22,12 @@ margin: 0.1rem auto 0.1rem auto;
 opacity:1;
 `);
 
-
+const Floater = styled.div`
+position: fixed;
+top:0;
+left:0;
+opacity: 0.5;
+`
 
 const TeamPane = (props) => {
     const dispatch = useDispatch();
@@ -34,14 +38,13 @@ const TeamPane = (props) => {
 
     const unboundGameState = useStore().getState().gamestate;
 
-    console.log("Pane1", paneTeam1);
-
     const galleryData = useSelector(state => state.gamestate.loadedGallery);
 
     const [paneMode, setPaneMode] = useState('List'); // Select
     const [selectedSlot, setSelectedSlot] = useState(0); // Select
 
     const [showLogin, setShowLogin] = useState();
+    const [errorMessage, setErrorMessage] = useState();
 
     const funnyLoadingMessages = [
         "Just catching some unicorns to power up the server...",
@@ -102,7 +105,6 @@ const TeamPane = (props) => {
         } else {
             setShowLogin(true);
         }
-
     };
 
     const [aniText, setAniText] = useState(null);
@@ -128,39 +130,27 @@ const TeamPane = (props) => {
             }
 
             setAniText(funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)]);
-            // Create new animated text
 
         }, 6000);
-
-
 
         setTimeout(() => {
             setAniText(funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)]);
         }, 1000);
 
-
         return () => {
             clearInterval(interval);
-
-
         }
-
     }, [stopText]);
-
-
-
-    const [saving, setIsSaving] = useState();
-
 
     const addToTeam = async (e) => {
 
         // Make sure not a dupe
         let allNFTs = [...unboundGameState.team_a, ...unboundGameState.team_b];
-
-        if (allNFTs.find(x => x && (x.collection === e.collection) && (x.id === e.id))) {
+        setErrorMessage();
+        if (allNFTs.find(x => x && (x.collection == e.collection) && (x.id == e.id))) {
+            setErrorMessage("NFT is already on a team.")
             return;
         }
-
 
         dispatch(gameActions.addToTeam({ team: props.letter, position: selectedSlot, collection: e.collection, nftid: e.id }));
 
@@ -169,19 +159,10 @@ const TeamPane = (props) => {
 
         const updateTeamResult = await fetch('/v1/updateteam', { method: 'POST', headers: { 'authorization': unboundGameState.jwt, 'content-type': 'application/json' }, body: JSON.stringify({ team: allNFTs }) });
 
-
         if (updateTeamResult.status !== 200) {
             console.log(updateTeamResult);
             return;
         }
-
-        // const updateTeamData = await updateTeamResult.json();
-
-        // if (updateTeamData?.message === "SUCCESS") {
-
-        // }
-
-
     }
 
     const selectableObjects = [
@@ -237,7 +218,10 @@ const TeamPane = (props) => {
             <SFXMenu setkey={`teamsfx${props.letter}`} selectableObjects={selectableObjects} mainMenuHandler={menuHandler} />}
 
         <LoginModal show={showLogin} onClose={() => { setShowLogin(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
-
+        {errorMessage && <Floater>
+            <Card style={{ width: '32rem', paddingLeft: '5rem' }}><span style={{ display: 'inline-block', whiteSpace: 'nowrap', padding: '0.3rem' }}>{errorMessage}</span></Card>
+        </Floater>
+        }
 
     </> : <SelectNFTPane pickNFTHandler={(e) => { console.log(e); if (e !== null) addToTeam(e); setPaneMode('List'); }} />;
 }

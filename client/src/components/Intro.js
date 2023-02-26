@@ -165,7 +165,6 @@ const Intro = (props) => {
             const galleryParts = galleryData.userName.split(",");
             localStorage.setItem("gogallery", galleryData);
 
-
             dispatch(gameActions.setUserWallet({ gallery: galleryParts[0], galleryName: galleryParts[1], jwt: '' }));
             navigate(`/${galleryName}/a_team`);
 
@@ -174,7 +173,6 @@ const Intro = (props) => {
 
     const mainMenuHandler = (action) => {
 
-        // Menu options can be expanded to test network
         dispatch(gameActions.setNetwork('http://access.mainnet.nodes.onflow.org:9000/'));
 
         if (!exiting) {
@@ -182,13 +180,10 @@ const Intro = (props) => {
             dispatch(gameActions.toggleBGM({ set: action === '/demo' ? true : false }));
             dispatch(gameActions.toggleSFX({ set: action === '/demo' ? true : false }));
 
-
             if (action === 'NEW GAME') {
-                // TODO: Create new gallery
                 dispatch(gameActions.disableKeylisteners({ set: true }));
                 console.log("DISABLE");
                 setShow(true);
-
 
             }
             if (action === 'LOAD') {
@@ -230,45 +225,24 @@ const Intro = (props) => {
                 }, 500);
             }
 
-            if (action === '/demo') {
-                handleSubmit({ preventDefault: () => { console.log("Making a new gallery with a known wallet.") }, target: [{ value: 'bjartek.find' }] });
-                // todo: instead load a preconfigured gallery
-            }
-
-
-            // navigate('/a_team');
         }
-
-
     };
-
-
-    // TODO: Change to "New Gallery" and "Continue" and "Demo"
-
-    // TODO: add row and col based selection with other arrow directions
-    // TODO: add keys for A/B
 
     const selectableObjects = lastCreatedAddress ? [
         { ctrl: <SelectableWrapper> NEW TEAM </SelectableWrapper>, val: 'NEW GAME' },
         { ctrl: <SelectableWrapper> CONTINUE </SelectableWrapper>, val: 'CONTINUE' },
         { ctrl: <SelectableWrapper> LOAD </SelectableWrapper>, val: 'LOAD' }
-        // { ctrl: <SelectableWrapper> DEMO  </SelectableWrapper>, val: '/demo' }
 
     ] : [
         { ctrl: <SelectableWrapper> NEW TEAM </SelectableWrapper>, val: 'NEW GAME' },
         { ctrl: <SelectableWrapper> LOAD </SelectableWrapper>, val: 'LOAD' },
-        // { ctrl: <SelectableWrapper> DEMO  </SelectableWrapper>, val: '/demo' }
 
     ];
 
     return <><FadeContainer style={{ opacity: exiting ? 0 : 1 }}>
         <TitleImage />
         <TopContainer> {showGalleryError ? <FlexItem> <Alert>{showGalleryError}</Alert></FlexItem> : <FlexItem>2023 Nick Tantillo<br />released under MIT license.</FlexItem>}</TopContainer>
-
         <SFXMenu setkey="mmsfx" mainMenuHandler={mainMenuHandler} selectableObjects={selectableObjects} exiting={exiting} />
-
-
-
     </FadeContainer>
 
         <Modal show={show} onHide={handleClose} size="xl">
@@ -276,10 +250,7 @@ const Intro = (props) => {
                 <Modal.Title>NEW TEAM</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-
                 {submittedCreate === false ? <>
-
-
                     <InputGroup className="mb-3">
                         <FormControl
                             type="hidden"
@@ -296,14 +267,10 @@ const Intro = (props) => {
                             style={{ fontSize: "1rem", border: '0.2rem solid black' }}
                             name={'displayval'}
                             required={true}
-
                             readOnly
                         />
-
                         <Button type="submit" variant={'secondary'} onClick={getNewSecret}>Re-Roll</Button>
-
                     </InputGroup>
-
                     <LoadWallet focus={show} label=".find or Flow Address" onSubmit={handleSubmit} pattern="(^0x[a-fA-F0-9]{16}$)|(.+\.[Ff][Ii][Nn][Dd])" />
                     {errorMessage && <Alert variant={'danger'}>{errorMessage}</Alert>}
                     <p style={{ textAlign: 'center' }}>Please enter your <img src={require('../../public/find_logo.png')} style={{ height: '1rem', marginTop: '-0.4rem' }} /> address <br />or your wallet address starting with "0x"</p>
@@ -316,16 +283,11 @@ const Intro = (props) => {
                     <p style={{ fontSize: '0.8rem', color: '#cccccc', textAlign: 'center' }}>
                         ...I could ask you to enter your wallet address one character at a time like a Game Genie but some 8-bit mechanics are better left in the past.
                     </p>
-
                 </Modal.Footer>
             }
         </Modal>
         <GalleryEnterModal show={showGallery} onClose={(e) => { loadHandler(e); setShowGallery(false); dispatch(gameActions.disableKeylisteners({ set: false })); }} />
-
     </>;
-
-
-
 }
 
 export default Intro;

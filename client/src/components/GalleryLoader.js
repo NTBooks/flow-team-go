@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
-import { useDispatch } from 'react-redux';
-import { gameActions } from '../store/gamestate';
 import Card from 'react-bootstrap/Card';
 import Spinner from 'react-bootstrap/Spinner';
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from 'react-redux';
+import { gameActions } from '../store/gamestate';
 import styled from 'styled-components';
 
 const Floater = styled.div`
@@ -42,18 +39,13 @@ const GalleryLoader = (props) => {
             })();
         }
 
-        // TODO: this is brute force but there should be more nuance especially for loading only known NFT IDs in the person's top 6. Although ownership still needs to be confirmed.
-
     }, [gallery]);
 
     return <Floater>
         {
             gallery ? (loaded ? <></> : <Card style={{ width: '32rem', paddingLeft: '5rem' }}><Spinner style={{ position: 'absolute', left: '1rem', top: 0 }}></Spinner><span style={{ display: 'inline-block', whiteSpace: 'nowrap', padding: '0.3rem' }}>Loading NFT collection...</span></Card>) : <></>
         }
-
     </Floater>
-
-
 }
 
 export default GalleryLoader;

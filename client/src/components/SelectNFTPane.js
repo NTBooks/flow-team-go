@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import SelectableWrapper from './SelectableWrapper';
-import styled from 'styled-components';
-import SFXMenu from './SFXMenu';
+import React, { useState } from 'react';
+import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 import ResizedImage from './ResizedImage';
+import SelectableWrapper from './SelectableWrapper';
+import SFXMenu from './SFXMenu';
 
 const ScrollContainer = styled.div`
 overflow-y: scroll;
@@ -15,7 +15,6 @@ width:100%;
 height:31rem;
 margin-top:-1rem;
 margin-left:-1rem;
-
 `;
 
 const SelectNFTPane = (props) => {
@@ -33,7 +32,6 @@ const SelectNFTPane = (props) => {
 
     if (galleryData && galleryData.nfts) {
 
-
         for (let [key, value] of Object.entries(galleryData.nfts)) {
 
             if (value.length > 0) {
@@ -45,8 +43,6 @@ const SelectNFTPane = (props) => {
                                 <Col xs={11}>{value[0].collectionName}</Col>
                             </Row>
                         </Container>
-
-
                     </SelectableWrapper>, val: key
                 })
             }
@@ -60,15 +56,12 @@ const SelectNFTPane = (props) => {
                         <Col xs={11}>Return to Team</Col>
                     </Row>
                 </Container>
-
-
             </SelectableWrapper>, val: 'BACK'
         }, ...selectableCategories];
 
     }
 
     if (selectedCollection) {
-        console.log(selectedCollection);
         selectableNFTs = galleryData.nfts[selectedCollection] ? galleryData.nfts[selectedCollection].map(x => {
 
             return {
@@ -79,11 +72,8 @@ const SelectNFTPane = (props) => {
                             <Col xs={10}>{x.name}</Col>
                         </Row>
                     </Container>
-
-
                 </SelectableWrapper>, val: x.id
             }
-
         }) : [];
 
         selectableNFTs = [{
@@ -94,31 +84,23 @@ const SelectNFTPane = (props) => {
                         <Col xs={11}>Return to Collections</Col>
                     </Row>
                 </Container>
-
-
             </SelectableWrapper>, val: 'BACK'
         }, ...selectableNFTs];
-
-        console.log(selectableNFTs);
     }
 
     const collectionMenuHandler = (cmd) => {
-
-        if (cmd === "BACK") props.pickNFTHandler(null);
-
+        if (cmd === "BACK") {
+            props.pickNFTHandler(null);
+        }
         setSelectedCollection(cmd);
-
     };
 
     const nftMenuHandler = (cmd) => {
-
-        if (cmd === "BACK") setSelectedCollection(null);
-
+        if (cmd === "BACK") {
+            setSelectedCollection(null);
+        }
         props.pickNFTHandler({ collection: selectedCollection, id: cmd })
-
     };
-
-
 
     return <div className={'nes-container with-title'} style={{ width: '38rem', margin: '3rem 1rem 1rem 1rem', height: '33rem', padding: '0 0 0 0' }}>
         <h3 className='title' style={{ fontSize: '2rem', marginTop: '-1.3rem', marginLeft: '1rem' }}>Select NFT</h3>
@@ -129,13 +111,9 @@ const SelectNFTPane = (props) => {
                     <SFXMenu setkey="nftsfx" mainMenuHandler={nftMenuHandler} selectableObjects={selectableNFTs} onCancel={() => { setSelectedCollection(null) }} />
                 </>
                 : <SFXMenu setkey="colsfx" mainMenuHandler={collectionMenuHandler} selectableObjects={selectableCategories} onCancel={() => { props.pickNFTHandler(null) }} />
-
-
             }
-
         </ScrollContainer>
     </div >;
-
 }
 
 export default React.memo(SelectNFTPane);

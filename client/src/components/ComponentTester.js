@@ -1,12 +1,10 @@
-import React, { cloneElement, useState, useEffect } from 'react';
+import React, { cloneElement, useEffect, useState } from 'react';
 import SelectableWrapper from './SelectableWrapper';
-
 import useKeyPress from '../hooks/useKeyPress';
 
 const ComponentTester = () => {
 
     const [selectedIndex, setSelectedIndex] = useState(0);
-
     const downPress = useKeyPress("ArrowDown");
     const upPress = useKeyPress("ArrowUp");
 
@@ -23,9 +21,6 @@ const ComponentTester = () => {
             );
         }
     }, [downPress]);
-
-    // TODO: add row and col based selection with other arrow directions
-    // TODO: add keys for A/B
 
     const selectableObjects = [
         <SelectableWrapper> Hello1 </SelectableWrapper>,
@@ -47,9 +42,3 @@ const ComponentTester = () => {
 }
 
 export default ComponentTester;
-
-// Select a slot, opens bank and select an NFT
-// Select options, opens options submenu
-// Submenu items can nest
-
-// Add "selected" and "onA" and "onB" controls to components?

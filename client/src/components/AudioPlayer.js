@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import useAudio from '../hooks/useAudio';
 import useKeyPress from '../hooks/useKeyPress';
-import { useSelector } from 'react-redux';
 
 const AudioPlayer = (props) => {
     const audioFiles = props.file ? [props.file] : [
@@ -14,10 +14,7 @@ const AudioPlayer = (props) => {
     ];
 
     const [playing, toggle, skip] = useAudio(audioFiles, props.loop);
-
-    const [BGMPlayer, setBGMPlayer] = useState();
     const BGMState = useSelector(state => state.gamestate.bgm_toggle);
-    const SFXState = useSelector(state => state.gamestate.sfx_toggle);
 
     useEffect(() => {
 
@@ -28,8 +25,6 @@ const AudioPlayer = (props) => {
         }
 
     }, [BGMState]);
-
-
 
     const sPress = useKeyPress("s");
 
